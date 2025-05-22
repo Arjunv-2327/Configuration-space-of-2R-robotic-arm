@@ -1,7 +1,7 @@
 % Base circle parameters
 r3 = 3;
-angle_start = 24.6648;     % Argument of limit point on main circle corresponding to link1 (this is the maximum theta1 for which theta2 can take all real angles from 0 to 360 without collision)
-dw = 2;                    % Angle deviation from angle_start
+angle_start = 24.6648;     % Argument of limit point on main circle
+dw = 15;                   % Angle deviation from angle_start
 
 % Compute the target angle
 angle_deg = angle_start + dw;
@@ -47,7 +47,6 @@ circle_dotted_x = P2(1) + r3 * cos(theta);
 circle_dotted_y = P2(2) + r3 * sin(theta);
 plot(circle_dotted_x, circle_dotted_y, 'b--', 'LineWidth', 1);
 
-
 % ---- INTERSECTION LOGIC ----
 
 % Rectangle edges as segments
@@ -73,12 +72,14 @@ for i = 1:4
     
     match_pts = seg_pts(mask, :);
     
-    if ~isempty(match_pts)
-        % Only take the first and last matching point per edge
-        intersections = [intersections; match_pts(1,:)]; 
-        if size(match_pts,1) > 1
-            intersections = [intersections; match_pts(end,:)]; 
-        end
+    if size(match_pts,1) >= 3
+        % Select the point in the middle of the first and last
+        mid_idx = round((1 + size(match_pts,1)) / 2);
+        intersections = [intersections; match_pts(mid_idx,:)];
+    elseif size(match_pts,1) == 2
+        intersections = [intersections; match_pts(1,:)];
+    elseif size(match_pts,1) == 1
+        intersections = [intersections; match_pts];
     end
 end
 
@@ -92,7 +93,12 @@ if size(intersections,1) >= 2
     
     fprintf('Intersection points for P2 circle:\n');
     disp(intersections(1:2,:));
-    
+
+    % Draw magenta lines from each intersection to P2
+    for i = 1:2
+        plot([P2(1) intersections(i,1)], [P2(2) intersections(i,2)], 'm-', 'LineWidth', 1.5);
+    end
+
 else
     warning('Less than 2 intersection points found for P2 circle.');
 end
