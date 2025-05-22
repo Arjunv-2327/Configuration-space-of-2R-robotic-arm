@@ -2,7 +2,7 @@
 r3 = 3;
 angle_start = 24.6648;     % Starting angle in degrees
 num_points = 10;
-angle_step = 5;            % Step size in degrees
+angle_step = 3;            % Step size in degrees
 
 % Generate angles
 angles_deg = angle_start + (0:num_points-1) * angle_step;
@@ -103,6 +103,7 @@ if size(intersections,1) >= 2
     
     fprintf('Intersection points for P2 circle:\n');
     disp(intersections(1:2,:));
+    
 else
     warning('Less than 2 intersection points found for P2 circle.');
 end
