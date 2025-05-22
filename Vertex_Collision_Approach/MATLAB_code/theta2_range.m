@@ -1,6 +1,6 @@
 % Base circle parameters
 r3 = 3;
-angle_start = 24.6648;     % Argument of limit point on main circle
+angle_start = 24.6648;     % Argument of limit point on main circle corresponding to link1 (this is the maximum theta1 for which theta2 can take all real angles from 0 to 360 without collision)
 dw = 2;                    % Angle deviation from angle_start
 
 % Compute the target angle
