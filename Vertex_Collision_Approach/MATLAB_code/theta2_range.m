@@ -1,24 +1,23 @@
 % Base circle parameters
 r3 = 3;
-angle_start = 24.6648;     % Starting angle in degrees
-num_points = 10;
-angle_step = 3;            % Step size in degrees
+angle_start = 24.6648;     % Argument of limit point on main circle
+dw = 2;                    % Angle deviation from angle_start
 
-% Generate angles
-angles_deg = angle_start + (0:num_points-1) * angle_step;
-angles_rad = deg2rad(angles_deg);
+% Compute the target angle
+angle_deg = angle_start + dw;
+angle_rad = deg2rad(angle_deg);
 
 % Circle centered at origin
 theta = linspace(0, 2*pi, 300);
 circle_x = r3 * cos(theta);
 circle_y = r3 * sin(theta);
 
-% Store point coordinates
-points = zeros(num_points, 2);
-
 % Load obstacle vertices
 load('obstacle_vertices.mat');  % loads 'vertices' (4x2 matrix)
 V4 = vertices(4, :);            % Extract vertex V4
+
+% Compute P2 position
+P2 = [r3 * cos(angle_rad), r3 * sin(angle_rad)];
 
 % Create figure
 figure;
@@ -39,25 +38,15 @@ patch('Vertices', vertices, ...
       'EdgeColor', 'k', ...
       'LineWidth', 1.5);
 
-% Compute all 10 points (just store them)
-for i = 1:num_points
-    px = r3 * cos(angles_rad(i));
-    py = r3 * sin(angles_rad(i));
-    points(i, :) = [px, py];
-end
-
-% Extract P2 only (here p2 is the 4th circle)
-P2 = points(4, :);
-
-% Plot P2 and its vector
+% Plot P2
 plot(P2(1), P2(2), 'bo', 'MarkerFaceColor', 'b');
-plot([0 P2(1)], [0 P2(2)], 'b-', 'LineWidth', 1.2);
 text(P2(1) + 0.1, P2(2), 'P2');
 
 % Plot dotted circle around P2
 circle_dotted_x = P2(1) + r3 * cos(theta);
 circle_dotted_y = P2(2) + r3 * sin(theta);
 plot(circle_dotted_x, circle_dotted_y, 'b--', 'LineWidth', 1);
+
 
 % ---- INTERSECTION LOGIC ----
 
