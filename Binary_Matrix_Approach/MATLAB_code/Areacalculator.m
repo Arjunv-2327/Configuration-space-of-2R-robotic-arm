@@ -1,7 +1,7 @@
 clear;
 close all;
 
-%cs_start1 = 120;
+%cs_start1 = 45;
 %cs_start2 = 90;
 
 % just displaying the manipulator
