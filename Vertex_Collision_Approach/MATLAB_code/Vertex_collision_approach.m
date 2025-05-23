@@ -1,9 +1,9 @@
-% Obstacle parameters
-l = 1.2;
-w = 0.6;
-alpha = -0.9;
-beta = 0.9;
-phi = 0.820305;
+% Rectangle parameters
+l = 1.2;               % Length
+w = 0.6;               % Width
+alpha = -0.9;          % Center X
+beta = 0.9;            % Center Y
+phi = 0.820305;        % Inclination (radians)
 
 % Midpoints of 2 parallel widths
 M_x = alpha - l*cos(phi)/2;
@@ -13,143 +13,124 @@ N_y = beta + l*sin(phi)/2;
 
 % Rectangle vertices (rotated)
 obstacle.vertices = [
-    M_x - w*sin(phi)/2, M_y + w*cos(phi)/2;  % vertex 1
-    N_x - w*sin(phi)/2, N_y + w*cos(phi)/2;  % vertex 2
-    M_x + w*sin(phi)/2, M_y - w*cos(phi)/2;  % vertex 3
-    N_x + w*sin(phi)/2, N_y - w*cos(phi)/2   % vertex 4
+    M_x - w*sin(phi)/2, M_y + w*cos(phi)/2;
+    N_x - w*sin(phi)/2, N_y + w*cos(phi)/2;
+    M_x + w*sin(phi)/2, M_y - w*cos(phi)/2;
+    N_x + w*sin(phi)/2, N_y - w*cos(phi)/2
 ];
 
 % Triangle-based rectangle
 obstacle.faces = [1 2 4; 1 4 3];
 
+% ---------- Plot Circle and Rectangle ----------
 figure;
-
-% Plot rectangle
-patch('Faces', obstacle.faces, 'Vertices', obstacle.vertices, ...
-      'FaceColor', [255 165 0]/255, 'EdgeColor', [255 165 0]/255);
-
 hold on;
-
-% Plot circle of radius 3 centered at (0,0)
-theta = linspace(0, 2*pi, 300);
 r = 3;
+theta = linspace(0, 2*pi, 300);
 x_circle = r * cos(theta);
 y_circle = r * sin(theta);
 plot(x_circle, y_circle, 'k', 'LineWidth', 1.5);  % black circle
+
+patch('Faces', obstacle.faces, 'Vertices', obstacle.vertices, ...
+      'FaceColor', [255 165 0]/255, 'EdgeColor', [255 165 0]/255);
 
 axis equal
 axis off
 xlim([-5 5])
 ylim([-5 5])
 
-% ---- Compute angles in radians from origin to each vertex ----
+% ---------- Compute Angles of All Vertices ----------
 angles_rad = zeros(1, 4);
-
 for i = 1:4
     x_i = obstacle.vertices(i, 1);
     y_i = obstacle.vertices(i, 2);
-    angle_standard = atan2(y_i, x_i);
-    
-    if alpha < 0
-        % Measure angle from positive X-axis
-        angles_rad(i) = mod(angle_standard, 2*pi);
-    else
-        % Measure angle from negative Y-axis (anticlockwise)
-        angle_shifted = angle_standard + pi/2;
-        angles_rad(i) = mod(angle_shifted, 2*pi);
+    angles_rad(i) = mod(atan2(y_i, x_i), 2*pi);
+end
+
+% ---------- Identify Pair with Max Angular Separation ----------
+max_diff = 0;
+idx1 = 0;
+idx2 = 0;
+for i = 1:3
+    for j = i+1:4
+        diff = abs(angles_rad(i) - angles_rad(j));
+        diff = min(diff, 2*pi - diff);  % shortest arc
+        if diff > max_diff
+            max_diff = diff;
+            idx1 = i;
+            idx2 = j;
+        end
     end
 end
 
-% Find min and max angle indices
-[theta_min_rad, idx_min] = min(angles_rad);
-[theta_max_rad, idx_max] = max(angles_rad);
+% ---------- Ensure Smallest Sector is Shaded ----------
+a1 = angles_rad(idx1);
+a2 = angles_rad(idx2);
+a1 = mod(a1, 2*pi);
+a2 = mod(a2, 2*pi);
 
-%PLOTTING FUNCTIONS
-
-% Find unit vectors in directions of those vertices
-v_min = obstacle.vertices(idx_min, :) / norm(obstacle.vertices(idx_min, :));
-v_max = obstacle.vertices(idx_max, :) / norm(obstacle.vertices(idx_max, :));
-
-% Scale unit vectors to circle radius r = 3
-endpoint_min = v_min * r;
-endpoint_max = v_max * r;
-
-% Plot radius lines from origin to circle boundary along vertex directions
-plot([0 endpoint_min(1)], [0 endpoint_min(2)], 'r--', 'LineWidth', 1.5);
-plot([0 endpoint_max(1)], [0 endpoint_max(2)], 'r--', 'LineWidth', 1.5);
-
-% Convert sector bounds back to standard polar angles (from +X axis)
-if alpha < 0
-    % No adjustment needed
-    theta_plot_min = theta_min_rad;
-    theta_plot_max = theta_max_rad;
+% Make sure the smaller sector is selected
+if mod(a2 - a1, 2*pi) <= mod(a1 - a2, 2*pi)
+    theta_start = a1;
+    theta_end = a2;
 else
-    % Angles measured from -Y axis; shift back by -π/2
-    theta_plot_min = mod(theta_min_rad - pi/2, 2*pi);
-    theta_plot_max = mod(theta_max_rad - pi/2, 2*pi);
-
-    % Ensure correct angle span
-    if theta_plot_max < theta_plot_min
-        theta_plot_max = theta_plot_max + 2*pi;
-    end
+    theta_start = a2;
+    theta_end = a1;
 end
 
-% Plot the sector enclosed between those radii
+% ---------- Draw Radius Lines ----------
+v1 = obstacle.vertices(idx1, :) / norm(obstacle.vertices(idx1, :));
+v2 = obstacle.vertices(idx2, :) / norm(obstacle.vertices(idx2, :));
+end1 = v1 * r;
+end2 = v2 * r;
+plot([0 end1(1)], [0 end1(2)], 'r--', 'LineWidth', 1.5);
+plot([0 end2(1)], [0 end2(2)], 'r--', 'LineWidth', 1.5);
+
+% ---------- Shade the Sector ----------
 num_points_sector = 100;
-theta_sector = linspace(theta_plot_min, theta_plot_max, num_points_sector);
+% Ensure shortest arc is shaded
+if theta_end < theta_start
+    theta_end = theta_end + 2*pi;
+end
+theta_sector = linspace(theta_start, theta_end, num_points_sector);
 x_sector = r * cos(theta_sector);
 y_sector = r * sin(theta_sector);
 sector_x = [0, x_sector, 0];
 sector_y = [0, y_sector, 0];
-patch(sector_x, sector_y, [1 0.8 0], 'FaceAlpha', 0.3, 'EdgeColor', 'none');
+patch(sector_x, sector_y, [1, 0.5, 0], 'FaceAlpha', 0.3, 'EdgeColor', 'none');
 
-
-% ----------- Annotate angles on the figure -----------
-
-% --- Convert angles back to standard polar reference (from +X axis) ---
-if alpha < 0
-    theta_min_plot = theta_min_rad;
-    theta_max_plot = theta_max_rad;
-else
-    % Angles were measured from -Y axis, shift back to +X axis
-    theta_min_plot = mod(theta_min_rad - pi/2, 2*pi);
-    theta_max_plot = mod(theta_max_rad - pi/2, 2*pi);
-
-    % Ensure positive angular span
-    if theta_max_plot < theta_min_plot
-        theta_max_plot = theta_max_plot + 2*pi;
-    end
+% ---------- Annotate Angles ----------
+theta_min_plot = theta_start;
+theta_max_plot = theta_end;
+if theta_max_plot < theta_min_plot
+    theta_max_plot = theta_max_plot + 2*pi;
 end
 
-% --- Convert to degrees ---
-theta_min_deg = rad2deg(theta_min_plot);
-theta_max_deg = rad2deg(theta_max_plot);
-angle_span_rad = theta_max_plot - theta_min_plot;
-angle_span_deg = rad2deg(angle_span_rad);
+theta_min_deg = mod(rad2deg(theta_min_plot), 360);
+theta_max_deg = mod(rad2deg(theta_max_plot), 360);
+angle_span_deg = theta_max_deg - theta_min_deg;
+if angle_span_deg < 0
+    angle_span_deg = angle_span_deg + 360;
+end
+if angle_span_deg > 360
+    angle_span_deg = 360;
+end
 
-%  Wrap angles for annotation (ensure in [0, 360) for display only)
-theta_min_deg = mod(theta_min_deg, 360);
-theta_max_deg = mod(theta_max_deg, 360);
-
-
-% --- Text labels for theta_min and theta_max ---
-text(endpoint_min(1)*1.1, endpoint_min(2)*1.1, ...
+text(end1(1)*1.1, end1(2)*1.1, ...
      sprintf('\\theta_{min} = %.1f^\\circ', theta_min_deg), ...
      'Color', 'r', 'FontSize', 10, 'HorizontalAlignment', 'left');
 
-text(endpoint_max(1)*1.1, endpoint_max(2)*1.1, ...
+text(end2(1)*1.1, end2(2)*1.1, ...
      sprintf('\\theta_{max} = %.1f^\\circ', theta_max_deg), ...
      'Color', 'r', 'FontSize', 10, 'HorizontalAlignment', 'left');
 
-% --- Label for angle span at center ---
 text(0.5, 0.3, ...
      sprintf('\\Delta\\theta = %.1f^\\circ', angle_span_deg), ...
      'Color', 'k', 'FontSize', 11, 'FontWeight', 'bold');
 
 hold off;
 
-% ------- Print angle values to console -------
+% ---------- Console Output ----------
 fprintf('Theta min (from +X): %.2f degrees\n', theta_min_deg);
 fprintf('Theta max (from +X): %.2f degrees\n', theta_max_deg);
 fprintf('Angle span: %.2f degrees\n', angle_span_deg);
-
