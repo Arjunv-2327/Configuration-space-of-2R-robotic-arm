@@ -1,7 +1,7 @@
-% Base circle parameters
+%Base circle parameters
 r3 = 3;
 angle_start = 24.6648;     % Argument of limit point on main circle
-dw = 13;                   % Angle deviation from angle_start (keep dw less than or maximum near 15 degrees)
+dw = 15;                   % Angle deviation from angle_start (keep dw less than or maximum near 15 degrees)
 
 % Compute the target angle
 angle_deg = angle_start + dw;
@@ -26,7 +26,7 @@ axis equal;
 grid on;
 xlabel('X');
 ylabel('Y');
-title('Focus on P2 Circle Intersections');
+%title('Focus on P2 Circle Intersections');
 
 % Plot main circle at origin
 plot(circle_x, circle_y, 'k-', 'LineWidth', 2);
@@ -89,7 +89,7 @@ intersections = unique(round(intersections, 6), 'rows');
 % Plot and return found points
 if size(intersections,1) >= 2
     plot(intersections(:,1), intersections(:,2), 'ko', ...
-        'MarkerSize', 10, 'MarkerFaceColor', 'k');
+        'MarkerSize', 7.5, 'MarkerFaceColor', 'k');
     
     fprintf('Intersection points for P2 circle:\n');
     disp(intersections(1:2,:));
@@ -130,4 +130,7 @@ if size(intersections,1) >= 2
     % Display results
     fprintf('Acute angle ∠OP2R1 = %.4f degrees\n', angle_OPR1);
     fprintf('Acute angle ∠OP2R2 = %.4f degrees\n', angle_OPR2);
+
+    %Restrictde range of theta2
+    fprintf('Restricted theta2 range = [%.4f, %.4f] degrees\n', angle_OPR2, angle_OPR1);
 end
