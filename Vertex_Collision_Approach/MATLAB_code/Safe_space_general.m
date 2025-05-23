@@ -24,6 +24,10 @@ obstacle.vertices = [
 ];
 obstacle.faces = [1 2 4; 1 4 3];
 
+obstacle_vertices = obstacle.vertices;
+save('obstacle_vertices.mat', 'obstacle_vertices');
+
+
 patch('Faces', obstacle.faces, 'Vertices', obstacle.vertices, ...
       'FaceColor', [255 165 0]/255, 'EdgeColor', [255 165 0]/255);
 
