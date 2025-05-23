@@ -24,8 +24,6 @@ obstacle.vertices = [
 vertices = obstacle.vertices;
 save('obstacle_vertices.mat', 'vertices');
 
-
-
 obstacle.faces = [1 2 4; 1 4 3];
 
 % Plot
@@ -40,10 +38,33 @@ theta = linspace(0, 2*pi, 300);
 plot(r*cos(theta), r*sin(theta), 'k', 'LineWidth', 1.5);
 axis equal off; xlim([-5 5]); ylim([-5 5]);
 
-% Angles to each vertex
+% ---------- Modified: Identify collision vertices via max angular span ----------
 angles_rad = mod(atan2(obstacle.vertices(:,2), obstacle.vertices(:,1)), 2*pi);
-[theta_min_rad, idx_min] = min(angles_rad);
-[theta_max_rad, idx_max] = max(angles_rad);
+max_diff = 0;
+idx_min = 0; idx_max = 0;
+for i = 1:3
+    for j = i+1:4
+        diff = abs(angles_rad(i) - angles_rad(j));
+        diff = min(diff, 2*pi - diff);  % shorter arc
+        if diff > max_diff
+            max_diff = diff;
+            idx_min = i;
+            idx_max = j;
+        end
+    end
+end
+
+% Ensure smallest sector is chosen
+a1 = angles_rad(idx_min);
+a2 = angles_rad(idx_max);
+if mod(a2 - a1, 2*pi) > mod(a1 - a2, 2*pi)
+    temp = idx_min;
+    idx_min = idx_max;
+    idx_max = temp;
+end
+
+theta_min_rad = angles_rad(idx_min);
+theta_max_rad = angles_rad(idx_max);
 
 % Plot sector boundary rays
 v_min = obstacle.vertices(idx_min,:) / norm(obstacle.vertices(idx_min,:));
