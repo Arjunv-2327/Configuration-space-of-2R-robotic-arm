@@ -3,7 +3,7 @@ l = 1.2;               % Length
 w = 0.6;               % Width
 alpha = -0.9;          % Center X
 beta = 0.9;            % Center Y
-phi = 0.820305;        % Inclination (radians)
+phi = 0.820305;        % Inclination
 
 % Midpoints of 2 parallel widths
 M_x = alpha - l*cos(phi)/2;
