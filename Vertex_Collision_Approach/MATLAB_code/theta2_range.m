@@ -1,7 +1,7 @@
 %Base circle parameters
 r3 = 3;
-angle_start = 24.6648;     % Argument of limit point on main circle
-dw = 15;                   % Angle deviation from angle_start (keep dw less than or maximum near 15 degrees)
+angle_start = 24.6648;     % Argument of limit point on main circle in degrees
+dw = 10;                   % Angle deviation from angle_start (keep dw less than or maximum near 15 degrees)
 
 % Compute the target angle
 angle_deg = angle_start + dw;
