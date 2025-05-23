@@ -1,7 +1,7 @@
 %Base circle parameters
 r3 = 3;
-angle_start = 24.6648;     % Argument of limit point on main circle in degrees
-dw = 10;                   % Angle deviation from angle_start (keep dw less than or maximum near 15 degrees)
+angle_start = 24.66;     % Argument of limit point on main circle in degrees
+dw = 12;                 % Angle deviation from angle_start (keep dw less than or maximum near 15 degrees)
 
 % Compute the target angle
 angle_deg = angle_start + dw;
@@ -13,7 +13,8 @@ circle_x = r3 * cos(theta);
 circle_y = r3 * sin(theta);
 
 % Load obstacle vertices
-load('obstacle_vertices.mat');  % loads 'vertices' (4x2 matrix)
+load('obstacle_vertices.mat');
+% loads 'vertices' (4x2 matrix)
 V4 = vertices(4, :);            % Extract vertex V4
 
 % Compute P2 position
@@ -132,5 +133,5 @@ if size(intersections,1) >= 2
     fprintf('Acute angle ∠OP2R2 = %.4f degrees\n', angle_OPR2);
 
     %Restrictde range of theta2
-    fprintf('Restricted theta2 range = [%.4f, %.4f] degrees\n', angle_OPR2, angle_OPR1);
+    fprintf('Restricted theta2 range = [%.4f, %.4f] degrees\n', min(angle_OPR2, angle_OPR1), max(angle_OPR2, angle_OPR1));
 end
