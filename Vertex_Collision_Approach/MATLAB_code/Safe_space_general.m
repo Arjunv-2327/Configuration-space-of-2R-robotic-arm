@@ -4,6 +4,7 @@ w = 0.6;               % Width
 alpha = -0.9;          % Center X
 beta = 0.9;            % Center Y
 phi = 0.820305;        % Inclination
+
 r = 3;
 
 % Draw Circle
