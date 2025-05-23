@@ -1,7 +1,7 @@
 %Base circle parameters
 r3 = 3;
 angle_start = 24.66;     % Argument of limit point on main circle in degrees
-dw = 12;                 % Angle deviation from angle_start (keep dw less than or maximum near 15 degrees)
+dw = 5;                 % Angle deviation from angle_start (keep dw less than or maximum near 15 degrees)
 
 % Compute the target angle
 angle_deg = angle_start + dw;
@@ -13,7 +13,8 @@ circle_x = r3 * cos(theta);
 circle_y = r3 * sin(theta);
 
 % Load obstacle vertices
-load('obstacle_vertices.mat');
+load('obstacle_vertices.mat', 'obstacle_vertices');
+vertices = obstacle_vertices;
 % loads 'vertices' (4x2 matrix)
 V4 = vertices(4, :);            % Extract vertex V4
 
