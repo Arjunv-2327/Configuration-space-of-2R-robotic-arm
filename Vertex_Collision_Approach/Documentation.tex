@@ -11,9 +11,9 @@ In robotic motion planning, the workspace is the physical environment containing
 
 \section{Binary Matrices Approach}
 In this method, we start with a simple 2R planar manipulator, which is kept near a small rectangular obstacle. The goal of this process is to find the set of joint angles of the robot, for which there is a collision-free motion. We are tasked with mapping the C-Space from the given workspace. For this, we use MATLAB R2024b. We start off by discretizing the values of both the joint angles, in steps of 2 degrees. Let us denote first joint angle as $\theta_1$, and the second joint angle measured with respect to the first link, as $\theta_2$. So now, we have both these angles taking values such as 0, 2, 4, ....upto 360 degrees. We assume there are no joint limits for this analysis.
-
+\newline
 We can observe that each unique configuration of the robot needs 2 parameters, which are basically $\theta_1$ and $\theta_2$. Since we discretize in steps of 2 degrees, both $\theta_1$ and $\theta_2$ can take 181 different angle values, starting from 0 and going till 360 degrees. So there are 181 x 181 unique configurations of the robot that is possible for the chosen discretization. We put all of these 181 x 181 values inside a square matrix having 181 rows and 181 columns. Also, there will be some configurations of the robot which will collide with the obstacle, while others may not. For all the configurations that collide with some part of the obstacle, we assign a value of 1 in the corresponding position of the 181 x 181 matrix. Collision free positions are denoted by 0 in the matrix. Now we finally have a matrix that contains only zeros and ones. We call this the binary matrix which tells us which configurations are collision free, and those which are collision prone.
-
+\newline
 We shall now get a visual idea of the C-Space by plotting the binary matrix. Create a plot with X-Axis as $\theta_1$ and Y-Axis as $\theta_2$. Use the binary matrix values to construct the plot. The collision prone configurations of the robot will be denoted by the number 1 in the matrix; so while plotting these, we assign black colour. Collision free configurations need not be plotted explicitly in any colour, as we are already plotting the collision prone positions in black. After plotting completely, we can get a plot which is shaded black in some regions, and others regions are just plain. The black regions correspond to all the collision-prone configurations, while the plain regions are collision-free configurations.
 \begin{figure}[h]
     \centering
@@ -21,7 +21,7 @@ We shall now get a visual idea of the C-Space by plotting the binary matrix. Cre
     \caption{Window on the right shows the plot between $\theta_2$ and $\theta_1$}
     \label{fig:1}
 \end{figure}
-
+\newline
 Next, we try to observe the variation in the C-Space plot, for a given input motion of the obstacle. We start off by considering a simple unidirectional translation of the obstacle along the vertical direction; and we plot the C-Space by sampling different positions that the obstacle would have visited during its motion. We keep incrementing the Y-coordinate of the obstacle center in steps of 0.25 units, upto 5 units. So we get - 
 \[
 \frac{5}{0.25} + 1 = 21 \text{(considering initial position also)}
@@ -82,9 +82,7 @@ So now we have 21 different positions of the obstacle, and we will have a 181 x 
         \centering
         \includegraphics[width=\linewidth]{C-Space_series/8.png}
     \end{minipage}
-
-\end{figure}
-\clearpage
+\end{figure}\clearpage
 We can observe that until the obstacle is within the circle described by the first link, the C-Space plot is a continuous layer without any break (first 6 figures above show this). Once the obstacle is outside the circle described by the first link, the C-Space becomes a discontinuous black layer with a break in between (last 2 figures above show this).
 \section{Geometric Approach}
 The previous approach gets mathematically more complex as we start to deal with higher order matrices. Hence we adopt a geometry based approach to find the set of joint angles for which there is safe motion of the robot, in a workspace filled with obstacles. We shall focus more on this geometry-based analysis to find the safe set of joint angles of the robot.
@@ -107,7 +105,7 @@ The obstacle is taken to be a simple rectangle, whose paramaters are controlled 
 \hline
 \end{tabular}
 \end{flushleft}
-For defining polygons in MATLAB, we need its vertices. So from the 5 known parameters, we have to mathematically calculate each of the 4 vertex coordinates. This is done as follows - 
+For defining polygons in MATLAB, we need its vertices. So from the 5 known parameters, we have to mathematically calculate each of the 4 vertex coordinates. This is done as follows in the next page - 
 \begin{center}
 \begin{tikzpicture}[scale=1.55]
 
@@ -158,9 +156,9 @@ For defining polygons in MATLAB, we need its vertices. So from the 5 known param
 
 \end{tikzpicture}
 \end{center}
-
+\newline
 $V1V2$ or $V3V4$ and $V1V3$ or $V2V4$ are the respective sides that represent the length and the width of the rectangle.
-
+\newline
 In order to determine the coordinates of the vertices, we begin with the following step. From the known parameters, we first calculate the midpoint coordinates of both the shorter sides (widths). Let us denote midpoint of $V1V3$ as $M$ and midpoint of $V2V4$ as $N$. By simple trigonometry, we can observe the following - 
 
 $$M_x = \alpha-(l/2)*\cos\phi$$
@@ -170,8 +168,7 @@ $$M_y = \beta-(l/2)*\sin\phi$$
 $$N_x = \alpha+(l/2)*\cos\phi$$
 
 $$N_y = \beta+(l/2)*\sin\phi$$
-
-
+\newline
 where $A_x$ and $A_y$ are the X and Y coordinates of point $A$. The following diagram shows the location of M and N as well.
 \begin{center}
 \begin{tikzpicture}[scale=1.55]
@@ -236,7 +233,7 @@ where $A_x$ and $A_y$ are the X and Y coordinates of point $A$. The following di
 \node[above right=10pt] at (\Nx,\Ny) {$(N_x, N_y)$};
 \end{tikzpicture}
 \end{center}
-
+\newline
 We can again use simple trigonometry to obtain the coordinates of all the 4 vertices, since we now know the midpoints of the widths.
 %\clearpage
 The coordinates of the 4 vertices are obtained as follows - 
@@ -249,8 +246,7 @@ V3_x &= M_x + \frac{w}{2} \sin\phi, \quad &V3_y &= M_y - \frac{w}{2} \cos\phi \\
 V4_x &= N_x + \frac{w}{2} \sin\phi, \quad &V4_y &= N_y - \frac{w}{2} \cos\phi
 \end{aligned}
 \]
-
-
+\newline
 where $A_x$ and $A_y$ are the X and Y coordinates of point $A$.
 This is how the obstacle is being defined as a rectangular object. We shall now move on to see how the links of the robot are defined.
 \subsection{Defining the First link}
@@ -338,7 +334,7 @@ By seeing, we can easily observe that vertices $V_3$ and $V_4$ are the points wh
 \clearpage
 \underline{\textbf{Algorithm used to detect the collision limits for link 1:}}
 \newline
-
+\newline
 There can be 5 broad way of classifying how the obstacle is placed within/near the circle as follows - 
 \newline
 Case 1: Obstacle is completely inside the circle
@@ -351,7 +347,84 @@ Case 4: Obstacle has 3 vertices outside the circle
 \newline
 Case 5: Obstacle has all of its 4 vertices outside the circle
 \newline
-For the purpose of analysis of the first link, we are not considering obstacles completely outside the circle, nor do we place the obstacle in configurations intersecting the origin, as mentioned before.
+For the purpose of analysis of the first link, we are not considering obstacles completely outside the circle, nor do we place the obstacle in configurations intersecting the origin, as mentioned before. We can now see the idea that is used to deal with the above 5 cases, and the algorithm that incorporates all the cases.
+\newline
+\newline
+\underline{\textbf{Case 1:}}
+\newline
+This is the most simplest case, wherein the obstacle completely lies within the circle described by the first link. The obstacle can have any orientation, position and dimensions. So our algorithm must be able to find the collision limits for every feasible configuration satisfying this case. The following diagram shows the collision limits that we are required to determine. We basically have to compute the range of $\theta_1$ for which there will be collision (remaining range is collision-free motion).
+\begin{center}
+\begin{tikzpicture}
+  % Draw circle with radius 3.5
+  \draw (0,0) circle (3.5);
 
+  % Draw center dot in red with radius 4pt
+  \filldraw[red] (0,0) circle (4pt);
+
+  % Draw radius line with annotation "link1" on the line
+  \draw[line width=3pt] (0,0) -- (2.475, 2.475) node[pos=0.5, above, sloped] {link1};
+
+  % --- Scope for obstacle (scaled and shifted)
+  \begin{scope}[scale=0.6, shift={(-2.0,3.0)}]  
+    \def\ll{3}
+    \def\ww{1.5}
+    \def\alphaa{-0.5}
+    \def\betaa{-0.5}
+    \def\phii{50}
+
+    \pgfmathsetmacro{\phirad}{\phii * pi / 180}
+    \pgfmathsetmacro{\hll}{\ll/2}
+    \pgfmathsetmacro{\hww}{\ww/2}
+    \pgfmathsetmacro{\ux}{cos(\phii)}
+    \pgfmathsetmacro{\uy}{sin(\phii)}
+    \pgfmathsetmacro{\vx}{-sin(\phii)}
+    \pgfmathsetmacro{\vy}{cos(\phii)}
+
+    \coordinate (V1) at ({\alphaa - \hll*\ux + \hww*\vx}, {\betaa - \hll*\uy + \hww*\vy});
+    \coordinate (V2) at ({\alphaa + \hll*\ux + \hww*\vx}, {\betaa + \hll*\uy + \hww*\vy});
+    \coordinate (V4) at ({\alphaa + \hll*\ux - \hww*\vx}, {\betaa + \hll*\uy - \hww*\vy});
+    \coordinate (V3) at ({\alphaa - \hll*\ux - \hww*\vx}, {\betaa - \hll*\uy - \hww*\vy});
+
+    % Draw rectangle
+    \draw[thick] (V1) -- (V2) -- (V4) -- (V3) -- cycle;
+
+    % Labels
+    \node[above left]  at (V1) {\scriptsize $V1$};
+    \node[above left]  at (V2) {\scriptsize $V2$};
+    \node[below right] at (V3) {\scriptsize $V3$};
+    \node[right=2pt]   at (V4) {\scriptsize $V4$};
+
+    % Save transformed V3 and V4 positions globally
+    \coordinate (GLOBV3) at (V3);
+    \coordinate (GLOBV4) at (V4);
+  \end{scope}
+
+  % --- Red dotted radii from origin to V3 and V4 (outside scope!)
+  \draw[red, dotted, thick] (0,0) -- (GLOBV3);
+  \draw[red, dotted, thick] (0,0) -- (GLOBV4);
+
+\end{tikzpicture}
+\end{center}
+\clearpage
+\underline{\textbf{The Algorithm:}}
+\newline
+We start off by calculating the angle between the positive X-Axis and the line segment joining the origin and vertex, for each of the 4 vertices.
+\newline
+Let's say the coordinate of a vertex is ($V_x$, $V_y$), so the corresponding angle between the positive X-Axis and the line segment joining the origin and this vertex is given by the following equation - $$\gamma = \tan^{-1}{(\frac{V_y}{V_x})}$$
+\newline
+We know that the range of the tan inverse function is from $-\pi$ to $\pi$. Hence we normalize this to $0$ to $2\pi$. So now we know the angles corresponding to all the 4 vertices of the obstacle, lying between 0 and 360 degrees. Let these angles be $\gamma_1, \gamma_2, \gamma_3$, and$ \gamma_4$.
+\newline
+We now select any 2 of these angles, in all possible combinations. After selecting 2 angles, we compute their absolute difference. Since we have 4 angles, we end up with 6 pair wise differences as follows:
+$\gamma_1 - \gamma_2$, $\gamma_1 - \gamma_3$, $\gamma_1 - \gamma_4$, $\gamma_2 - \gamma_3$, $\gamma_2 - \gamma_4$, and 
+$\gamma_3 - \gamma_4$.
+Whichever difference is maximum, those 2 vertices corresonding to that pair shall give us the collision limits. Note that we only need the absolute value of the difference, so the sign does not matter. In our case, $\gamma_3 - \gamma_4$ turns out to be the maximum of all the 6 pair wise differences. So the vertices $V3$ and $V4$ become the collision limits for link 1.
+\newline
+\newline
+\underline{\textbf{Case 2:}}
+\newline
+In this case, we have exactly one of the vertices of the obstacle to lie outside the circle. This case turns out be be very similar to the first case. We use the exact same algorithm to find out the collision limits. One thing we do differently here is that we exclude the vertex that lies outside the cirlce. So the pair wise differences are only taken between the remaining 3 vertices which are inside, and that pair is chosen which yields maximum difference. From here, we can get the collision limits for link 1 in the same manner. 
+\newline
+\newline
+In order to determine whether a vertex lies inside or outside the circle, we can simply use the equation of circle to check with the points.
 \end{document}
 
