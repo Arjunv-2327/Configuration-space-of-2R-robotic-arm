@@ -426,5 +426,32 @@ In this case, we have exactly one of the vertices of the obstacle to lie outside
 \newline
 \newline
 In order to determine whether a vertex lies inside or outside the circle, we can simply use the equation of circle to check with the points.
+\newline
+This is the equation of our circle: $x^2 + y^2 = 3^2$, as the radius is the link length, which is 3 units.
+So bringing all terms to one side, we get
+%\newline
+S as $x^2 + y^2 - 9 = 0$
+\newline
+We can now substitute the coordinates of each vertex into S.
+\newline
+If S$>$0, point lies outside the cirle, and if S$<$0, point lies inside the circle.
+\newline
+where S $=x^2 + y^2 - 9 $
+\newline
+In the next few cases,this circle equation becomes very useful to check whether the vertices lie inside or outside the circle. Even for the first case, the condition S$<$0 would have been satsfied by every point, which means that every point is inside the circle.
+\newline
+\newline
+\underline{\textbf{Case 3:}}
+\newline
+In this case, we have 2 of the vertices of the obstacle to lie outside the circle. First we calculate the value of S, which is equal to $x^2 + y^2 - 9$, for all the 4 vertices, and throw those vertices for which S$>$0. We basically ignore the vertices which are lying outside the circle, as these don't help in finding the collision limits.
+\newline
+\newline
+It has been observed that in this case, we can further make classifications on how the obstacle can be configured. The first subcase is similar to what we have done till now, where the collision limits are given by the vertices subtending the maximum angular span. However, the second subcase talks about the following configuration, where the one of the collision limit is one of the in-lying vertices, and the other collision limit is one of the intersection points of the obstacle and circle.
+\newline
+\newline
+The following 2 figures will help us understand these 2 subcases which were mentioned above.
+
+
+
 \end{document}
 
