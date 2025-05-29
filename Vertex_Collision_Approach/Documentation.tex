@@ -1,6 +1,8 @@
 \documentclass[12pt]{article}
 \usepackage{graphicx}
+%\usepackage{amsmath}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{tikz}
 \title{C-Space of a 2-link Planar Manipulator Arm}
 \date{}
@@ -725,7 +727,7 @@ We can check for self-intersection in the following manner. If the segment self-
 We sample a few equally spaced points along the segment and check if any point satisfies the following two conditions:
 \begin{itemize}
     \item The distance from the origin to the sampled point is less than the radius: \( OP < R \)
-    \item The angle of that point lies within the collision limit range: \( \theta_{\text{min}} \leq \theta \leq \theta_{\text{max}} \)
+    \item The argument angle of that point lies within the collision limit range of link 1: \( \theta_{\text{min}} \leq \theta \leq \theta_{\text{max}} \)
 \end{itemize}
 If even a single point of the segment satisfies the conditions above, that segment is rejected.
 \newline
@@ -751,6 +753,95 @@ From this analysis, we can determine the configurations that correspond to the c
 We can easily get the angles corresponding to these points on the circumference from the same tan inverse formula, and normalize it between 0 and 360 degrees.
 \clearpage
 \subsubsection{Collision range of $\theta_2$}
+Let us start off with the below example, which was used for the previous sub-case as well.
+\begin{figure}[h!]
+    \centering
+    \begin{minipage}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{C-Space_series/b1.png}
+        \caption{Figure depicts the 2 extreme configurations of the robot for which there is no collision at all}
+        \label{fig:b1}
+    \end{minipage}
+    \hfill
+    
+\end{figure}
+\newline
+The blue and magenta radii indicate the extreme orientations of link 1. In between these 2 extreme radii, we can take any radii as link 1, and the arm will never collide with the obstacle irrespective of the value of $\theta_2$.
+\newline
+\newline
+Only at these extreme orientations of link 1, the end of the second link would just meet the vertex of the obstacle; so we can understand that if we choose any radii which is outside this limit as link 1, there will be some values of $\theta_2$ which will lead to collision.
+\newline
+\newline
+In this section, our goal is to find out the range of $\theta_2$ which results in collision, given we know how much we deviate from the limit, for link 1. This is illustrated in the following figure.
+\clearpage
+\begin{figure}[h!]
+    \centering
+    \begin{minipage}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{C-Space_series/c4.png}
+        \caption{Collision range for link 2 in magenta}
+        \label{fig:c4}
+    \end{minipage}
+    \hfill
+    
+\end{figure}
+\newline
+\begin{itemize}
+    \item Here, we can observe 2 black radii that are drawn. The radii to $P$ denotes the initial configuration of link 1 (one of the safe limits), which is calculated from previous analyses; so the black radii to $P$ here is same as the magenta radii in the previous figure (Figure 14).
+    
+    \item From this point $P$, we rotate link 1 by some angle dw, to reach point $P_2$ as shown. Now if we try to construct the second link from $P_2$, we can see that it will have an upper and lower limit within which it will collide with the obstacle. The upper limit occurs when link 2 just grazes the width-containing side of the obstacle, and the lower limit occurs when link 2 just grazes the length-contaning side of the obstacle. We have to determine this angle range for $\theta_2$. Once we have this, we will get to know the safe operating regions of $\theta_2$.
 
+    \item The method to find collision points is similar to before. Knowing the coordinates of $P_2$ (after rotating from P) and that link 2 has a length of 3 units, we determine where it collides with the rectangle. The detailed calculations for the collision limits of $\theta_2$ are discussed on the next page.
+    
+    \item We know point \(P\) from the previous analysis and take its coordinates to be \((P_x, P_y)\), where both \(P_x\) and \(P_y\) are known. The deviation of link 1 from this point will also be known; assume the deviation to be \(dw\). We now know two things — the coordinates of point \(P\) as well as the angular deviation from point \(P\). With this, we calculate the coordinates of point \(P_2\) as follows:
+\end{itemize}
+
+\[
+P_{2x} = R \cos(dw + \arg(P))
+\]
+\[
+P_{2y} = R \sin(dw + \arg(P))
+\]
+
+where:
+
+\[
+\begin{array}{l l}
+P_{2x}  & \quad \text{--- is the X-coordinate of } P_2 \\
+P_{2y}  & \quad \text{--- is the Y-coordinate of } P_2 \\
+R       & \quad \text{--- is the radius of the circle} \\
+dw      & \quad \text{--- is the deviation from point } P \\
+\arg(P) & \quad \text{--- is the argument angle of point } P, \text{ which is given by } \tan^{-1} \left( \frac{P_y}{P_x} \right)
+\end{array}
+\]
+
+\begin{itemize}
+    \item Now, since we have the coordinates of point \(P_2\), we can go ahead with finding the intersection points of link 2 with the obstacle sides.
+    
+    \item From simple geometry, we can see that link 2 revolves around \(P_2\), with respect to link 1. So the complete range of all configurations of link 2 would be given by the circle centred at \(P_2\), and having radius equal to the length of link 2. Due to the presence of the obstacle, this circle would intersect the rectangle at 2 points, in this case. These 2 intersection points will directly give us the collision limits for \(\theta_2\).
+    
+    \item We can use the equation of this new circle, say \(S^1\), and sample points on the obstacle edges to check if they satisfy the equation \(S^1 = 0\) or not. Points satisfying \(S^1 = 0\) will give us the 2 points on the obstacle edges.
+\end{itemize}
+
+Equation \(S^1\) is as follows:
+
+\[
+(x - P_{2x})^2 + (y - P_{2y})^2 = R^2
+\]
+
+\clearpage
+which simplifies to:
+
+\[
+(x - P_{2x})^2 + (y - P_{2y})^2 - 9 = 0
+\]
+
+, taking the length of link 2 to be also equal to 3 units.
+
+\end{document}
+
+
+
+\end{itemize}
 \end{document}
 
