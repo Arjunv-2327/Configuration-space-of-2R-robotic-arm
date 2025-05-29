@@ -450,7 +450,122 @@ It has been observed that in this case, we can further make classifications on h
 \newline
 \newline
 The following 2 figures will help us understand these 2 subcases which were mentioned above.
-
+\begin{figure}[h!]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{C-Space_series/c2s1.png}
+        \caption{Collision limits are \newline
+        determined from vertices as usual}
+        \label{fig:c2s1}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{n.png}
+        \caption{Collision limits depend on one vertex and one intersection point}
+        \label{fig:n}
+    \end{minipage}
+\end{figure}
+\newline
+\underline{\textbf{The Algorithm:}}
+\newline
+We start off by eliminating those vertices which are outside the circle by using the circle equation given by S.
+\newline
+$$S>0$$The above inequality implies that the point is thrown from further analysis.
+\newline
+We then calculate the 2 intersection points of the circle and the rectangle, by using the circle equation S and sampling points on the edges of the rectangle. We would be checking which of these sampled points satisfy the equation S$=$0. Let us call these intersection points as $M_1$ and $M_2$. We now have 2 intersection points and 2 in-lying vertices. Let $P$ be a list containing these 4 points, where $P_i$ denotes the i-th point from the following list.
+$$P=[M_1, M_2, V_q, V_r]$$
+where $V_q$ and $V_r$ are the in-lying vertices, or the vertices that remain after throwing the out-lying vertices.
+From here, the process is similar to what we have been doing in the first few cases. We compute the angle between the positive X-Axis and the line segment joining the origin and $P_i$, for all the 4 points of the list. These angles are calculated by using the same tan inverse formula, and normalized to the range of 0 to 360 degrees. Once we have the 4 angles, we compute all the pair wise differences and select the pair which yields maximum absolute difference. These 2 points obtained shall give us the collision limits. Note that the collision limits maybe 2 vertices, or a vertex and an intersection point, depending on how the obstacle is configured. Given below are 2 more examples coming under this case.
+\begin{figure}[h!]
+    \centering
+    \begin{minipage}{0.44\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{C-Space_series/n6.png}
+        \caption{Ex.1}
+        \label{fig:n6}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.44\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{C-Space_series/n3.png}
+        \caption{Ex.2}
+        \label{fig:n3}
+    \end{minipage}
+\end{figure}
+\newline
+\underline{\textbf{Case 4:}}
+\newline
+In this case, we have 3 vertices of the obstacle to lie outside the circle. As we have done before, we calculate the value of S, which is equal to $x^2 + y^2 - 9$, for all the 4 vertices, and throw the 3 vertices for which S$>$0.
+\newline
+\newline
+Since 3 vertices are outside the cirlce, it obviously means that there is only 1 vertex inside the circle, and that there are again 2 intersection points. The following figures represent configurations of the obstacle satisfying this case.
+\begin{figure}[h!]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{C-Space_series/n8.png}
+        \caption{Ex.1}
+        \label{fig:n8}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{C-Space_series/n10.png}
+        \caption{Ex.2}
+        \label{fig:n10}
+    \end{minipage}
+\end{figure}
+We repeat the same process that we have done in previous case.
+\newline
+We just have to calculate the intersection points, and store them in a list along with that 1 in-lying vertex; now for these 3 points in the list, we calculate the pair wise differences of the angles and pick the pair which again yields the maximum absolute difference.
+\newline
+\newline
+\underline{\textbf{Case 5:}}
+\newline
+In this case, we have all the vertices of the obstacle to lie outside the circle. By seeing a few figures, we can directly observe that the 2 intersection points of the rectangle and circle will also be the 2 collision limits for the first link. We have to make sure that S$>$0 for all the vertices, and then compute the intersection points $M_1$ and $M_2$ by sampling points on the rectangle edges and checking which of those are satisfying the equation of circle S=0. We can observe a few examples in the next page.
+\clearpage
+\begin{figure}[h!]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{C-Space_series/a1.png}
+        \caption{Ex.1}
+        \label{fig:a1}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{C-Space_series/a2.png}
+        \caption{Ex.2}
+        \label{fig:a2}
+    \end{minipage}
+\end{figure}
+Once we have the intersection points $M_1$ and $M_2$, these 2 points directly become the collision limits, and we can calculate the angles corresponding to these points from the tan inverse formula as we have done for all other cases.
+\newline
+\newline
+\underline{\textbf{Final Algorithm to handle all 5 cases:}}
+\newline
+\begin{itemize}
+    \item Make a list $V$ containing all the vertices of the rectangle. Let $V_i$ be the $i$-th element of this list.
+    
+    \item Compute the value of the distance $OV_i$ for all points in $V$, where $O$ is the origin. Let R denote the radius of the circle, which is 3 units.
+    
+    \item Make a new list $B$, and append all the computed $OV_i$ values to it. Now, the $j$-th element of list $B$ shall be represented as $B_j$.
+    
+    \item Use the following conditionals to decide the case:
+    \begin{itemize}
+        \renewcommand\labelitemi{--}
+        \item If all elements of $B < R$, use case 1.
+        \item If only one element of $B > R$, use case 2.
+        \item If two elements of $B > R$, use case 3.
+        \item If three elements of $B > R$, use case 4.
+        \item If all elements of $B > R$, use case 5.
+    \end{itemize}
+    
+    \item In code, cases 1 and 2 will be combined as 1 condition, and cases 3,4 and 5 are combined as another condition, due to similarities.
+\end{itemize}
 
 
 \end{document}
