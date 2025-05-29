@@ -332,6 +332,7 @@ We can now place the obstacle fully or partially inside this circle, by choosing
 \end{center}
 By seeing, we can easily observe that vertices $V_3$ and $V_4$ are the points where the first link will collide when it tries to rotate a full 360 degrees, in both directions. So now we try and come up with an algorithm that gives us the 2 collision points on the rectangle, and essentially the safe operating range of $\theta_1$ (angle rotated by the first link)
 \clearpage
+\subsection{Determining the Collision limits for the First link}
 \underline{\textbf{Algorithm used to detect the collision limits for link 1:}}
 \newline
 \newline
@@ -354,6 +355,7 @@ For the purpose of analysis of the first link, we are not considering obstacles 
 \newline
 This is the most simplest case, wherein the obstacle completely lies within the circle described by the first link. The obstacle can have any orientation, position and dimensions. So our algorithm must be able to find the collision limits for every feasible configuration satisfying this case. The following diagram shows the collision limits that we are required to determine. We basically have to compute the range of $\theta_1$ for which there will be collision (remaining range is collision-free motion).
 \begin{center}
+\scalebox{.9}{ % Uniform scaling of everything
 \begin{tikzpicture}
   % Draw circle with radius 3.5
   \draw (0,0) circle (3.5);
@@ -402,8 +404,8 @@ This is the most simplest case, wherein the obstacle completely lies within the 
   % --- Red dotted radii from origin to V3 and V4 (outside scope!)
   \draw[red, dotted, thick] (0,0) -- (GLOBV3);
   \draw[red, dotted, thick] (0,0) -- (GLOBV4);
-
 \end{tikzpicture}
+}
 \end{center}
 \clearpage
 \underline{\textbf{The Algorithm:}}
@@ -430,20 +432,20 @@ In order to determine whether a vertex lies inside or outside the circle, we can
 This is the equation of our circle: $x^2 + y^2 = 3^2$, as the radius is the link length, which is 3 units.
 So bringing all terms to one side, we get
 %\newline
-S as $x^2 + y^2 - 9 = 0$
+$S$ as $x^2 + y^2 - 9 = 0$
 \newline
-We can now substitute the coordinates of each vertex into S.
+We can now substitute the coordinates of each vertex into $S$.
 \newline
-If S$>$0, point lies outside the cirle, and if S$<$0, point lies inside the circle.
+If $S>$0, point lies outside the cirle, and if $S<$0, point lies inside the circle.
 \newline
-where S $=x^2 + y^2 - 9 $
+where $S =x^2 + y^2 - 9 $
 \newline
-In the next few cases,this circle equation becomes very useful to check whether the vertices lie inside or outside the circle. Even for the first case, the condition S$<$0 would have been satsfied by every point, which means that every point is inside the circle.
+In the next few cases,this circle equation becomes very useful to check whether the vertices lie inside or outside the circle. Even for the first case, the condition $S<$0 would have been satsfied by every point, which means that every point is inside the circle.
 \newline
 \newline
 \underline{\textbf{Case 3:}}
 \newline
-In this case, we have 2 of the vertices of the obstacle to lie outside the circle. First we calculate the value of S, which is equal to $x^2 + y^2 - 9$, for all the 4 vertices, and throw those vertices for which S$>$0. We basically ignore the vertices which are lying outside the circle, as these don't help in finding the collision limits.
+In this case, we have 2 of the vertices of the obstacle to lie outside the circle. First we calculate the value of $S$, which is equal to $x^2 + y^2 - 9$, for all the 4 vertices, and throw those vertices for which $S>$0. We basically ignore the vertices which are lying outside the circle, as these don't help in finding the collision limits.
 \newline
 \newline
 It has been observed that in this case, we can further make classifications on how the obstacle can be configured. The first subcase is similar to what we have done till now, where the collision limits are given by the vertices subtending the maximum angular span. However, the second subcase talks about the following configuration, where the one of the collision limit is one of the in-lying vertices, and the other collision limit is one of the intersection points of the obstacle and circle.
@@ -470,11 +472,12 @@ The following 2 figures will help us understand these 2 subcases which were ment
 \newline
 \underline{\textbf{The Algorithm:}}
 \newline
-We start off by eliminating those vertices which are outside the circle by using the circle equation given by S.
+We start off by eliminating those vertices which are outside the circle by using the circle equation given by $S$.
 \newline
 $$S>0$$The above inequality implies that the point is thrown from further analysis.
 \newline
-We then calculate the 2 intersection points of the circle and the rectangle, by using the circle equation S and sampling points on the edges of the rectangle. We would be checking which of these sampled points satisfy the equation S$=$0. Let us call these intersection points as $M_1$ and $M_2$. We now have 2 intersection points and 2 in-lying vertices. Let $P$ be a list containing these 4 points, where $P_i$ denotes the i-th point from the following list.
+We then calculate the 2 intersection points of the circle and the rectangle, by using the circle equation $S$ and sampling points on the edges of the rectangle. We would be checking which of these sampled points satisfy the equation $S=$0. Let us call these intersection points as $M_1$ and $M_2$. We now have 2 intersection points and 2 in-lying vertices. Let $P$ be a list containing these 4 points, where $P_i$ denotes the \textit{i}-th
+ element of the following list.
 $$P=[M_1, M_2, V_q, V_r]$$
 where $V_q$ and $V_r$ are the in-lying vertices, or the vertices that remain after throwing the out-lying vertices.
 From here, the process is similar to what we have been doing in the first few cases. We compute the angle between the positive X-Axis and the line segment joining the origin and $P_i$, for all the 4 points of the list. These angles are calculated by using the same tan inverse formula, and normalized to the range of 0 to 360 degrees. Once we have the 4 angles, we compute all the pair wise differences and select the pair which yields maximum absolute difference. These 2 points obtained shall give us the collision limits. Note that the collision limits maybe 2 vertices, or a vertex and an intersection point, depending on how the obstacle is configured. Given below are 2 more examples coming under this case.
@@ -497,7 +500,7 @@ From here, the process is similar to what we have been doing in the first few ca
 \newline
 \underline{\textbf{Case 4:}}
 \newline
-In this case, we have 3 vertices of the obstacle to lie outside the circle. As we have done before, we calculate the value of S, which is equal to $x^2 + y^2 - 9$, for all the 4 vertices, and throw the 3 vertices for which S$>$0.
+In this case, we have 3 vertices of the obstacle to lie outside the circle. As we have done before, we calculate the value of $S$, which is equal to $x^2 + y^2 - 9$, for all the 4 vertices, and throw the 3 vertices for which $S>$0.
 \newline
 \newline
 Since 3 vertices are outside the cirlce, it obviously means that there is only 1 vertex inside the circle, and that there are again 2 intersection points. The following figures represent configurations of the obstacle satisfying this case.
@@ -517,14 +520,14 @@ Since 3 vertices are outside the cirlce, it obviously means that there is only 1
         \label{fig:n10}
     \end{minipage}
 \end{figure}
-We repeat the same process that we have done in previous case.
 \newline
+We repeat the same process that we have done in previous case.
 We just have to calculate the intersection points, and store them in a list along with that 1 in-lying vertex; now for these 3 points in the list, we calculate the pair wise differences of the angles and pick the pair which again yields the maximum absolute difference.
 \newline
 \newline
 \underline{\textbf{Case 5:}}
 \newline
-In this case, we have all the vertices of the obstacle to lie outside the circle. By seeing a few figures, we can directly observe that the 2 intersection points of the rectangle and circle will also be the 2 collision limits for the first link. We have to make sure that S$>$0 for all the vertices, and then compute the intersection points $M_1$ and $M_2$ by sampling points on the rectangle edges and checking which of those are satisfying the equation of circle S=0. We can observe a few examples in the next page.
+In this case, we have all the vertices of the obstacle to lie outside the circle. By seeing a few figures, we can directly observe that the 2 intersection points of the rectangle and circle will also be the 2 collision limits for the first link. We have to make sure that $S>$0 for all the vertices, and then compute the intersection points $M_1$ and $M_2$ by sampling points on the rectangle edges and checking which of those are satisfying the equation of circle $S$=0. We can observe a few examples in the next page.
 \clearpage
 \begin{figure}[h!]
     \centering
@@ -564,9 +567,190 @@ Once we have the intersection points $M_1$ and $M_2$, these 2 points directly be
         \item If all elements of $B > R$, use case 5.
     \end{itemize}
     
-    \item In code, cases 1 and 2 will be combined as 1 condition, and cases 3,4 and 5 are combined as another condition, due to similarities.
+    \item In code, cases 1 and 2 will be combined as "if condition" 1, and cases 3,4 and 5 are combined as "if condition" 2, due to similarities.
 \end{itemize}
+\clearpage
+\subsection{Defining the Second link}
+The second link will be dimensionally identical to the first link. The start of the second link is connected to the end of the first link, by a revolute joint. Obviously, even the first link is connected to the base via a revolute joint. That is why we call this as a 2R robot, meaning there are 2 revolute pairs. The following figure shows the construction of the second link, attached to the first.
+\begin{center}
+\begin{tikzpicture}
+  % Draw circle with radius 3.5
+  \draw (0,0) circle (3.5);
 
+  % Draw center dot in red with radius 4pt
+  \filldraw[red] (0,0) circle (4pt);
+
+  % First link (link1): 45 degrees from center
+  \pgfmathsetmacro{\r}{3.5}
+  \pgfmathsetmacro{\xone}{\r * cos(45)}
+  \pgfmathsetmacro{\yone}{\r * sin(45)}
+  \coordinate (P1) at (\xone,\yone);
+  \draw[line width=3pt] (0,0) -- (P1) node[pos=0.5, above, sloped] {link1};
+  \filldraw[red] (P1) circle (4pt);
+
+  % Second link (link2): 75 degrees from x-axis (i.e., 30° from link1)
+  \pgfmathsetmacro{\angleTwo}{75}
+  \pgfmathsetmacro{\xTwo}{\xone + \r * cos(\angleTwo)}
+  \pgfmathsetmacro{\yTwo}{\yone + \r * sin(\angleTwo)}
+  \coordinate (P2) at (\xTwo,\yTwo);
+  \draw[line width=3pt] (P1) -- (P2) node[pos=0.5, above, sloped] {link2};
+
+\end{tikzpicture}
+\end{center}
+For the purpose of geometric analysis, we aren't taking into account any joint rotation limits, meaning that both $\theta_1$ and $\theta_2$ can take any value between 0 and 360 degrees. $\theta_1$ is measured from the positive X-Axis in Anticlockwise direction, whereas $\theta_2$ is measured from the direction of the first link. We can later define how $\theta_2$ is exactly defined. Somtimes we may prefer the acute angle between link 1 and link 2, sometimes the obtuse angle. During computation, we have to clearly define $\theta_2$. In code, $\theta_2$ is taken as the acute angle between link 1 and link 2.
+\clearpage
+\subsection{Obtaining range of joint angles for safe operation}
+\subsubsection{Complete safe operating range of $\theta_1$}
+For a given position of the obstacle, we will have to obtain the full ranges of both $\theta_1$ and $\theta_2$ for which there will be a collision-free motion. We have already identified the collision limits for link 1 alone, without considering the second link, but certain configurations of the 2R robot in which the the first link isn't colliding with the obstacle may still lead to collision due to the presence of the second link, in certain orientations.
+\newline
+\newline
+We shall proceed in the following manner - we will try to compute a safe operating range of $\theta_1$ for which $\theta_2$ can take any value, meaning that this range of $\theta_1$ is completely safe independent of the value of $\theta_2$. We then move onto the remaining range of $\theta_1$ and obtain the ranges of $\theta_2$ which cause collision. Note that we will not go into the collision regions of $\theta_1$, as these configurations will always have the first link hitting the obstacle irrespective of thet value of $\theta_2$. We have already done this analysis in the previous sub-section.
+\newline
+\newline
+The figures presented below correspond to the preceding discussion.
+\begin{figure}[h!]
+    \centering
+    \begin{minipage}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{C-Space_series/b1.png}
+        \caption{Ex.1}
+        \label{fig:b1}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{C-Space_series/b2.png}
+        \caption{Ex.2}
+        \label{fig:a2}
+    \end{minipage}
+\end{figure}
+\newline
+The 2 figures above show the collision limits for the first link, as denoted by the red dotted-radii. The (blue/magenta) segment from the origin to the circumference of the circle is the first link, and the segment which starts from the point where the first link ends, is the the second link. More details of these figures are explained in the next page.
+\newline
+\newline
+\newline
+Let's take the figure on the left, for an example. We know that the red dotted-radii is the collision range corresponding to link 1. In order to find the complete safe range of $\theta_1$ for which the robot never collides with the obstacle irrespective of the value of $\theta_2$, we make constructions in the following manner - 
+\newline
+\begin{itemize}
+  \item Take any of the collision limit points as the starting point — let's say the right vertex \( V_4 \).
+  
+  \item From this point, construct a line segment of length 3 units such that it perfectly ends on the circumference of the existing circle.
+  
+  \item This newly drawn segment represents the second link of the robot.
+  
+  \item Now, construct the radius (first link) from the origin to this point on the circle.
+  
+  \item The configuration attained now corresponds to the extreme value of \( \theta_1 \) that the robot can take to ensure safe operation.
+  
+  \item Since this is a limiting case, we assume the second link just grazes the vertex \( V_4 \), which is why we constructed the second link directly from \( V_4 \).
+  
+  \item We observe that if \( \theta_1 \) is increased even slightly beyond this angle, the second link can no longer rotate freely through \( 360^\circ \).
+  
+  \item In such a case, there exists both an upper and a lower limit for \( \theta_2 \) as well.
+  
+  \item The upper limit of \( \theta_2 \) corresponds to the configuration where the second link just grazes the width-containing side \( V_2V_4 \).
+  
+  \item The lower limit of \( \theta_2 \) corresponds to the configuration where the second link just grazes the length-containing side \( V_3V_4 \).
+  
+  \item What we aim to do here is to find the range of \( \theta_2 \) for which there will be a collision with the obstacle, given a certain deviation of \( \theta_1 \) from its safe limit.
+  
+  \item Note that this safe limit for \( \theta_1 \) is the one obtained by drawing a 3 unit long segment from $V4$ that ends exactly on the circle, and constructing the radius to that point. It is not the collision limits of $\theta_1$ that are represented by the red dotted-radii. The mathematical calculations are shown below.
+\end{itemize}
+Let us denote the coordinate of the vertex $V4$ as simply $(V_x, V_y)$. In our case, it happens to be V4, in other cases the point maybe a different vertex or an intersetion. That is why we aren't taking the coordinates with subsript 4.
+We can take the coordinates of any point lying on the cirumference of the circle as follows - $$(x,y)=(R\cos\theta, R\sin\theta)$$, where $R$ is the radius of the circle and $\theta$ is the argument of that point in parametric form.
+\newline
+\newline
+Now we use the simple distance formula between this point on the circle and vertex $(V_x, V_y)$. We know that the second link is also 3 units long, so this distance equals 3.
+$$(V_x-R\cos\theta)^2 + (V_y-R\sin\theta)^2=3^2$$
+The above equation uses the simple distance formula between 2 points. We can also substitute R as 3, since the radius of the circle is also 3 units. So the equation now becomes - $$(V_x-3\cos\theta)^2 + (V_y-3\sin\theta)^2=9$$
+It can be simplified as follows - 
+$$(V_x^2 + 9\cos^2\theta-6V_x\cos\theta)+(V_y^2 + 9\sin^2\theta-6V_y\sin\theta)=9$$
+$$V_x^2 + V_y^2 = 6V_x\cos\theta+6V_y\sin\theta$$
+We then take - 
+\[
+A = V_x, \quad B = V_y, \quad C = \frac{V_x^2 + V_y^2}{6}
+\]
+We finally get - 
+\[
+A\cos\theta + B\sin\theta = C
+\]
+\clearpage
+The equation $A\cos\theta + B\sin\theta = C$ can be solved using the auxiliary angle method as follows - 
+
+We are given the equation:
+\[
+A\cos\theta + B\sin\theta = C
+\]
+
+Define $W$ and $\alpha$ as follows - 
+\[
+W = \sqrt{A^2 + B^2}, \quad \alpha = \tan^{-1}\left(\frac{B}{A}\right)
+\]
+
+Then we rewrite the left-hand side as:
+\[
+A\cos\theta + B\sin\theta = W\cos(\theta - \alpha)
+\]
+
+So the equation becomes:
+\[
+W\cos(\theta - \alpha) = C
+\]
+
+Which implies:
+\[
+\cos(\theta - \alpha) = \frac{C}{W}
+\]
+
+This equation has real solutions only if:
+\[
+\left| \frac{C}{W} \right| \leq 1
+\]
+
+Therefore, the general solution is:
+\[
+\theta = \alpha \pm \cos^{-1}\left( \frac{C}{W} \right)
+\]
+
+Substituting back for $\alpha$ and $W$, we get:
+\[
+\theta = \tan^{-1}\left(\frac{B}{A}\right) \pm \cos^{-1}\left(\frac{C}{\sqrt{A^2 + B^2}}\right)
+\]
+\newline
+\newline
+From here, we can get 2 angles, which means that there can be 2 points on the circle at a distance of 3 units from vertex $V4$. We only contsider the solution that produces a line segment that doesn't intersect the obstacle.
+\newline
+We can check for self-intersection in the following manner. If the segment self-intersects, it means that some portion of that segment lies in the collision limit of $\theta_1$. This means that some points on this segment are within the sector enclosed by the collision limits of $\theta_1$.
+\newline
+We sample a few equally spaced points along the segment and check if any point satisfies the following two conditions:
+\begin{itemize}
+    \item The distance from the origin to the sampled point is less than the radius: \( OP < R \)
+    \item The angle of that point lies within the collision limit range: \( \theta_{\text{min}} \leq \theta \leq \theta_{\text{max}} \)
+\end{itemize}
+If even a single point of the segment satisfies the conditions above, that segment is rejected.
+\newline
+\newline
+From this analysis, we can determine the configurations that correspond to the complete safe range of \(\theta_1\), for which the robot never collides with the obstacle regardless of the value of \(\theta_2\). The following figures represent a few other obstacle configurations.
+\begin{figure}[h!]
+    \centering
+    \begin{minipage}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{C-Space_series/c2.png}
+        \caption{Ex.1}
+        \label{fig:c2}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{C-Space_series/c3.png}
+        \caption{Ex.2}
+        \label{fig:c3}
+    \end{minipage}
+\end{figure}
+\newline
+We can easily get the angles corresponding to these points on the circumference from the same tan inverse formula, and normalize it between 0 and 360 degrees.
+\clearpage
+\subsubsection{Collision range of $\theta_2$}
 
 \end{document}
 
