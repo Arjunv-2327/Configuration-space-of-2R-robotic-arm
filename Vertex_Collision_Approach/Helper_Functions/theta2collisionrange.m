@@ -47,12 +47,9 @@ function theta2collisionrange(initial_angle, dw, obstacle)
         mask = abs(dists - r3) < 1e-3;
         match_pts = seg_pts(mask, :);
 
-        if size(match_pts,1) >= 3
+        if size(match_pts,1) >= 1
             mid_idx = round((1 + size(match_pts,1)) / 2);
             intersections = [intersections; match_pts(mid_idx,:)];
-            edge_indices = [edge_indices; i];
-        elseif size(match_pts,1) >= 1
-            intersections = [intersections; match_pts(1,:)];
             edge_indices = [edge_indices; i];
         end
     end
@@ -60,18 +57,20 @@ function theta2collisionrange(initial_angle, dw, obstacle)
     intersections = unique(round(intersections, 6), 'rows');
     R_actual = [];
 
-    if size(intersections,1) >= 2
+    % ------------------ Always Filter Crossing Segments ------------------
+    if ~isempty(intersections)
         rect_x = vertices([1 2 4 3 1], 1);
         rect_y = vertices([1 2 4 3 1], 2);
 
-        for i = 1:2
+        for i = 1:size(intersections,1)
             P_int = intersections(i,:);
-            t = linspace(0, 1, 15)';
+            t = linspace(0, 1, 1000)';
             sample_pts = P2 + t .* (P_int - P2);
-            sample_pts = sample_pts(2:end-1, :);
+            sample_pts = sample_pts(2:end-1, :);  % exclude endpoints
             inside = inpolygon(sample_pts(:,1), sample_pts(:,2), rect_x, rect_y);
 
             if any(inside)
+                % Intersecting line goes through rectangle bulk → replace with grazing ray
                 edge_id = edge_indices(i);
                 v1 = edges(2*edge_id - 1, :);
                 v2 = edges(2*edge_id, :);
@@ -87,23 +86,27 @@ function theta2collisionrange(initial_angle, dw, obstacle)
                 unit_vec = dir_vec / norm(dir_vec);
                 endpoint = P2 + r3 * unit_vec;
 
-                % Draw grazing magenta ray and black dot at vertex
                 plot([P2(1) endpoint(1)], [P2(2) endpoint(2)], 'm-', 'LineWidth', 1.5);
                 plot(nearest_vertex(1), nearest_vertex(2), 'ko', 'MarkerSize', 7.5, 'MarkerFaceColor', 'k');
                 R_actual = [R_actual; endpoint];
             else
-                % Draw direct magenta line and black dot at intersection
+                % Clean intersection → use as is
                 plot([P2(1) P_int(1)], [P2(2) P_int(2)], 'm-', 'LineWidth', 1.5);
                 plot(P_int(1), P_int(2), 'ko', 'MarkerSize', 7.5, 'MarkerFaceColor', 'k');
                 R_actual = [R_actual; P_int];
             end
         end
     else
-        warning('Less than 2 intersection points found for P2 circle.');
+        warning('No intersection points found for P2 circle.');
         return;
     end
 
     % ------------------ Compute Acute Angles ------------------
+    if size(R_actual, 1) < 2
+        warning('Fewer than 2 rays found — cannot compute angle range.');
+        return;
+    end
+
     O = [0 0];
     OP = P2 - O;
     R1 = R_actual(1,:);
@@ -126,5 +129,5 @@ function theta2collisionrange(initial_angle, dw, obstacle)
     theta_max = max(angle_OPR1, angle_OPR2);
 
     % ------------------ Final Output ------------------
-    fprintf('Unfeasible range of theta_2 measured wrt link_1 is [%.4f°, %.4f°]\n', theta_min, theta_max);
+    fprintf('Unfeasible theta2 range based on final magenta rays is [%.4f°, %.4f°]\n', theta_min, theta_max);
 end
