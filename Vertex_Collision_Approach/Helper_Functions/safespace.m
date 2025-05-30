@@ -1,4 +1,4 @@
-function [blue_angle, magenta_angle] = safespace(r, obstacle)
+function [blue_angle, magenta_angle] = safespace(r, d, obstacle)
     figure;
     hold on;
     axis equal off;
@@ -117,14 +117,14 @@ function [blue_angle, magenta_angle] = safespace(r, obstacle)
     for k = 1:2
         vx = from_pts(k,1); vy = from_pts(k,2);
         A = vx; B = vy;
-        C = (vx^2 + vy^2)/(2*r);
+        C = (vx^2 + vy^2 + r^2 - d^2)/(2*r);
         R = sqrt(A^2 + B^2);
         delta = atan2(B,A);
         if abs(C/R) <= 1
             sol = mod([delta + acos(C/R), delta - acos(C/R)], 2*pi);
             for a = sol
                 px = r*cos(a); py = r*sin(a);
-                t_vals = [0.1 0.25 0.5 0.75 0.9];
+                t_vals = linspace(0.01, 0.99, 100);
                 pts = (1 - t_vals') * [vx vy] + t_vals' * [px py];
                 safe = true;
                 for i = 1:length(t_vals)
