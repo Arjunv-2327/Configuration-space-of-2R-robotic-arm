@@ -797,10 +797,10 @@ In this section, our goal is to find out the range of $\theta_2$ which results i
 \end{itemize}
 
 \[
-P_{2x} = R \cos(dw + \arg(P))
+P_{2x} = R \cos(\arg(P)+dw)
 \]
 \[
-P_{2y} = R \sin(dw + \arg(P))
+P_{2y} = R \sin(\arg(P)+dw)
 \]
 
 where:
@@ -810,7 +810,7 @@ where:
 P_{2x}  & \quad \text{--- is the X-coordinate of } P_2 \\
 P_{2y}  & \quad \text{--- is the Y-coordinate of } P_2 \\
 R       & \quad \text{--- is the radius of the circle} \\
-dw      & \quad \text{--- is the deviation from point } P \\
+dw      & \quad \text{--- is the angular deviation from point } P \\
 \arg(P) & \quad \text{--- is the argument angle of point } P, \text{ which is given by } \tan^{-1} \left( \frac{P_y}{P_x} \right)
 \end{array}
 \]
@@ -821,7 +821,6 @@ dw      & \quad \text{--- is the deviation from point } P \\
     \item From simple geometry, we can see that link 2 revolves around \(P_2\), with respect to link 1. So the complete range of all configurations of link 2 would be given by the circle centred at \(P_2\), and having radius equal to the length of link 2. Due to the presence of the obstacle, this circle would intersect the rectangle at 2 points, in this case. These 2 intersection points will directly give us the collision limits for \(\theta_2\).
     
     \item We can use the equation of this new circle, say \(S^1\), and sample points on the obstacle edges to check if they satisfy the equation \(S^1 = 0\) or not. Points satisfying \(S^1 = 0\) will give us the 2 points on the obstacle edges.
-\end{itemize}
 
 Equation \(S^1\) is as follows:
 
@@ -837,11 +836,44 @@ which simplifies to:
 \]
 
 , taking the length of link 2 to be also equal to 3 units.
-
-\end{document}
-
-
-
+    \item In this method, we assume that the end of link 2 exactly meets the obstacle edges in the limiting cases. It can also be possible that one of the limits corresponds to the end of link 2 landing on an obstacle side, while the other limit of link 2 occurs in such a way that some vertex of the obstacle lies somewhere on the link 2, not necessarily its end. This is observed during large deviations from the safe limit.  The following diagram illustrates this possibility.
+    \begin{figure}[h!]
+    \centering
+    \begin{minipage}{0.8\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{C-Space_series/c5.png}
+        \caption{Upper limit is a vertex collision and lower limit is an edge collision}
+        \label{fig:c5}
+    \end{minipage}
+    \hfill
+    
+\end{figure}
+\newline
+So to make the logic more general, we just have to add another simple condition in the existing algorithm. As usual, we find the intersection points of the circle centred at P2 and the obstacle edges. Then draw a segment from P2 to these intersection. We then sample 1000 intermediate points on each of these segments and check whether any of these points lie inside the obstacle bulk. If this happens, we can understand that it corresponds to a case where the limit is determined by the vertex, not the edge.
+So we avoid drawing this segment, instead we find the vertex associated with collision, and construct the segment of length 3 towards that vertex as shown in the above figure. This can happen for both the upper and lower limit as well. Two more examples are shown below.
+\begin{figure}[h!]
+    \centering
+    \makebox[\textwidth][c]{%
+        \begin{minipage}[t]{0.59\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{C-Space_series/c6.png}
+            \caption{Ex.1}
+            \label{fig:c6}
+        \end{minipage}%
+        \hfill
+        \begin{minipage}[t]{0.65\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{C-Space_series/c7.png}
+            \caption{Ex.2}
+            \label{fig:c7}
+        \end{minipage}
+    }
+\end{figure}
 \end{itemize}
+
+
+
+
+
 \end{document}
 
