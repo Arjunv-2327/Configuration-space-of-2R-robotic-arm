@@ -1,8 +1,13 @@
-function [P_circle, P_centres] = centre_finder(l1, l2, l3, m, c, xmin, xmax)
+function [angles, P_circle, P_centres] = centre_finder(l1, l2, l3, m, c, xmin, xmax)
     % Inputs:
     % l1, l2, l3 - segment lengths
     % m, c       - slope and intercept of line y = m*x + c
     % xmin, xmax - bounds of line segment on x-axis
+    %
+    % Outputs:
+    % angles     - angles (in radians, 0 to 2*pi) of l1 segment from +x axis
+    % P_circle   - points (px, py) on l2 circle
+    % P_centres  - centers (h,k) of l2 circle
     
     x_samples = linspace(xmin, xmax, 5000);
     y_samples = m * x_samples + c;
@@ -48,6 +53,7 @@ function [P_circle, P_centres] = centre_finder(l1, l2, l3, m, c, xmin, xmax)
     
     if isempty(candidates)
         disp('No valid centers found that satisfy all constraints.');
+        angles = [];
         P_centres = [];
         P_circle = [];
         return;
@@ -59,6 +65,10 @@ function [P_circle, P_centres] = centre_finder(l1, l2, l3, m, c, xmin, xmax)
     
     P_centres = best(:, 2:3); % centers (h,k)
     P_circle = best(:, 4:5);  % points (px, py)
+    
+    % Calculate angles for each center relative to +x axis (0 to 2*pi)
+    angles = atan2(P_centres(:,2), P_centres(:,1));
+    angles(angles < 0) = angles(angles < 0) + 2*pi;
     
     % Plotting
     figure; hold on; axis equal; 
