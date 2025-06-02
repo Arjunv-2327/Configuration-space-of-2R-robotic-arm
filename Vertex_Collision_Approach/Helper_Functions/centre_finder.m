@@ -1,117 +1,137 @@
-function centre_finder(l1, l2, l3, alpha, beta, m, c, xmin, xmax)
-    % Compute possible centers (h,k) of the unknown circle
-    centers = find_circle_center_nosymbolic(l1, l2, l3, alpha, beta);
+function centre_finder(l1, l2, l3, m, c, xmin, xmax)
+    % Generate 5000 sample points on the line segment
+    x_samples = linspace(xmin, xmax, 5000);
+    y_samples = m * x_samples + c;
     
-    if isempty(centers)
-        disp('No valid centers found. Circles do not intersect.');
+    best_centers = [];
+    best_sample_idx = -1;
+
+    % Iterate over all samples and check if circles intersect and satisfy l2 criteria
+    for i = 1:length(x_samples)
+        alpha = x_samples(i);
+        beta = y_samples(i);
+        
+        centers = find_circle_center_nosymbolic(l1, l2 + l3, alpha, beta);
+
+        if isempty(centers)
+            continue;
+        end
+
+        % For each valid center, check if l2 constraint is satisfied
+        for j = 1:size(centers,1)
+            h = centers(j,1);
+            k = centers(j,2);
+
+            % Closest point from center (h,k) to line
+            xp = (h + m*(k - c)) / (1 + m^2);
+            yp = m * xp + c;
+
+            % Clamp closest point to segment bounds
+            if xp < xmin
+                xp = xmin;
+                yp = m * xp + c;
+            elseif xp > xmax
+                xp = xmax;
+                yp = m * xp + c;
+            end
+
+            % Unit vector direction
+            dir = [xp - h, yp - k];
+            unit_dir = dir / norm(dir);
+
+            % Compute point on the unknown circle (l3 units from closest point)
+            px = xp - l3 * unit_dir(1);
+            py = yp - l3 * unit_dir(2);
+
+            % Check if distance from center (h,k) to point (px,py) is l2
+            dist_l2 = norm([px - h, py - k]);
+
+            if abs(dist_l2 - l2) < 1e-6  % good match
+                best_centers = [best_centers; h, k, px, py, xp, yp];
+                best_sample_idx = i;
+            end
+        end
+    end
+
+    if isempty(best_centers)
+        disp('No valid centers found that satisfy all constraints.');
         return;
     end
 
-    fprintf('Possible centers (h,k):\n');
-    disp(centers);
+    %fprintf('Found %d valid center(s).\n', size(best_centers,1));
 
     figure; hold on; axis equal; grid on;
-    title('Possible Circle Centers (h, k)');
+    title('Valid Circle Centers (h, k)');
     xlabel('x'); ylabel('y');
 
-    % Plot the constraint circle (center at origin, radius = l1)
+    % Plot fixed origin circle
     theta = linspace(0, 2*pi, 500);
     plot(l1 * cos(theta), l1 * sin(theta), 'b', 'LineWidth', 1.2);
-    text(0, 0, '  Origin (0,0)', 'Color', 'b');
+    scatter(0, 0, 100, 'r', 'filled');  % origin
 
-    % Thick red dot at origin
-    scatter(0, 0, 100, 'o', 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'r');
-
-    % Plot the line y = mx + c (bounded between xmin and xmax)
+    % Plot the line
     x_line = linspace(xmin, xmax, 500);
-    plot(x_line, m * x_line + c, 'r', 'LineWidth', 1.2);
-    text(xmin, m*xmin + c, '  Line y = mx + c', 'Color', 'r');
+    y_line = m * x_line + c;
+    plot(x_line, y_line, 'r', 'LineWidth', 1.2);
 
-    % Plot the known point on the line (alpha, beta)
-    scatter(alpha, beta, 60, 'ko', 'filled');
-    text(alpha, beta, '  Closest Point', 'Color', 'k');
+    % Colors
+    color_l1 = 'k';
+    color_l2 = [0.5, 0.25, 0];
+    color_l3 = [1, 0.4, 0.7];
 
-    % Define segment colors
-    color_l1 = 'k';              % black for origin to (h,k)
-    color_l2 = [0.5, 0.25, 0];   % brown for (h,k) to (px, py)
-    color_l3 = [1, 0.4, 0.7];    % pink for (px, py) to (alpha, beta)
+    for i = 1:size(best_centers,1)
+        h = best_centers(i,1);
+        k = best_centers(i,2);
+        px = best_centers(i,3);
+        py = best_centers(i,4);
+        xp = best_centers(i,5);
+        yp = best_centers(i,6);
 
-    for i = 1:size(centers,1)
-        h = centers(i,1);
-        k = centers(i,2);
+        % Plot unknown circle
+        x_circ = h + l2 * cos(theta);
+        y_circ = k + l2 * sin(theta);
+        plot(x_circ, y_circ, '--', 'Color', color_l2, 'LineWidth', 1.2);
 
-        % Compute angular position from origin to (h, k)
-        theta_angle = atan2(k, h);
-        if theta_angle < 0
-            theta_angle = theta_angle + 2*pi; % Convert to [0, 2*pi)
-        end
-        fprintf('Angular position of l1 segment %d: %.4f radians (%.2f°)\n', i, theta_angle, rad2deg(theta_angle));
-
-        % Unit vector from center (h,k) to closest point (alpha,beta)
-        dir = [alpha - h, beta - k];
-        unit_dir = dir / norm(dir);
-
-        % Calculate point on unknown circle (distance l3 away from closest point along line)
-        px = alpha - l3 * unit_dir(1);
-        py = beta - l3 * unit_dir(2);
-
-        % Thick red dot at center (h,k)
-        scatter(h, k, 100, 'o', 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'r');
+        % Plot center and segments
+        scatter(h, k, 100, 'r', 'filled');
         text(h, k, sprintf('  (h=%.2f, k=%.2f)', h, k), 'Color', 'g');
 
-        % Plot segments and labels
-        plot([0, h], [0, k], '-', 'LineWidth', 6, 'Color', color_l1);
+        % l1 segment
+        plot([0, h], [0, k], '-', 'LineWidth', 2.5, 'Color', color_l1);
         text((0+h)/2, (0+k)/2, 'l1', 'FontSize', 10, 'Color', color_l1, 'FontWeight', 'bold');
 
-        plot([h, px], [k, py], '-', 'LineWidth', 4, 'Color', color_l2);
+        % l2 segment
+        plot([h, px], [k, py], '-', 'LineWidth', 2.5, 'Color', color_l2);
         text((h+px)/2, (k+py)/2, 'l2', 'FontSize', 10, 'Color', color_l2, 'FontWeight', 'bold');
 
-        plot([px, alpha], [py, beta], '-', 'LineWidth', 2, 'Color', color_l3);
-        text((px+alpha)/2, (py+beta)/2, 'l3', 'FontSize', 10, 'Color', color_l3, 'FontWeight', 'bold');
+        % l3 segment
+        plot([px, xp], [py, yp], '-', 'LineWidth', 2.5, 'Color', color_l3);
+        text((px+xp)/2, (py+yp)/2, 'l3', 'FontSize', 10, 'Color', color_l3, 'FontWeight', 'bold');
 
-        % Thick red dot at point on circle
-        scatter(px, py, 100, 'o', 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'r');
-
-        % Dashed unknown circle
-        x_circle = h + l2 * cos(theta);
-        y_circle = k + l2 * sin(theta);
-        plot(x_circle, y_circle, '--', 'Color', color_l2, 'LineWidth', 1.2);
+        % Points
+        scatter(px, py, 100, 'r', 'filled');
+        scatter(xp, yp, 60, 'ko', 'filled');
     end
 end
 
-function centers = find_circle_center_nosymbolic(l1, l2, l3, xp, yp)
-    % Radii
-    r1 = l1;
-    r2 = l2 + l3;
-
-    % Centers of circles
-    x1 = 0; y1 = 0;     % origin circle
-    x2 = xp; y2 = yp;   % circle centered at known point on line
-
-    % Distance between centers
+function centers = find_circle_center_nosymbolic(l1, r2, xp, yp)
+    x1 = 0; y1 = 0;
+    x2 = xp; y2 = yp;
     d = sqrt((x2 - x1)^2 + (y2 - y1)^2);
 
-    % Check intersection validity
-    if d > r1 + r2 || d < abs(r1 - r2)
-        centers = []; % no intersection
+    if d > l1 + r2 || d < abs(l1 - r2)
+        centers = [];
         return;
     end
 
-    % Distance from first center to point P2 along line joining centers
-    a = (r1^2 - r2^2 + d^2) / (2*d);
-
-    % Coordinates of point P2
+    a = (l1^2 - r2^2 + d^2) / (2*d);
     x3 = x1 + a * (x2 - x1) / d;
     y3 = y1 + a * (y2 - y1) / d;
 
-    % Height from P2 to intersection points
-    h = sqrt(r1^2 - a^2);
-
-    % Offsets perpendicular to line between centers
+    h = sqrt(l1^2 - a^2);
     rx = -(y2 - y1) * (h / d);
     ry =  (x2 - x1) * (h / d);
 
-    % Two intersection points - possible centers (h,k)
     centers = [x3 + rx, y3 + ry; 
                x3 - rx, y3 - ry];
 end
