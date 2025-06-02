@@ -1,4 +1,4 @@
-% Rectangle parameters
+% Rectangular Obstacle Parameters
 l = 1.2;               % Length
 w = 0.6;               % Width
 alpha = -0.9;          % Center X
@@ -8,8 +8,8 @@ dw = 5;                % Deviation in degrees
 
 
 % Robot Link lengths
-L_1 = 3;
-L_2 = 3;
+L_1 = 3;  % length of link 1
+L_2 = 3;  % length of link 2
 
 
 % Obstacle creation
