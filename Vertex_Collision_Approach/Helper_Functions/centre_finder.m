@@ -1,4 +1,4 @@
-function [angles, P_circle, P_centres] = centre_finder(l1, l2, l3, m, c, xmin, xmax)
+function [angle_degs, P_circle, P_centres] = centre_finder(l1, l2, l3, m, c, xmin, xmax)
     % Inputs:
     % l1, l2, l3 - segment lengths
     % m, c       - slope and intercept of line y = m*x + c
@@ -69,6 +69,7 @@ function [angles, P_circle, P_centres] = centre_finder(l1, l2, l3, m, c, xmin, x
     % Calculate angles for each center relative to +x axis (0 to 2*pi)
     angles = atan2(P_centres(:,2), P_centres(:,1));
     angles(angles < 0) = angles(angles < 0) + 2*pi;
+    angle_degs = angles*180/pi;
     
     % Plotting
     figure; hold on; axis equal; 
