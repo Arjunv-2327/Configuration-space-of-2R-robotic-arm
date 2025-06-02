@@ -1,14 +1,15 @@
-function [angle_degs, P_circle, P_centres] = centre_finder(l1, l2, l3, m, c, xmin, xmax)
+function [angle_degs, P_circle, P_centres] = three_links(l1, l2, l3, m, c, xmin, xmax, obstacle)
     % Inputs:
     % l1, l2, l3 - segment lengths
     % m, c       - slope and intercept of line y = m*x + c
     % xmin, xmax - bounds of line segment on x-axis
+    % obstacle   - struct with fields: obstacle.vertices (Nx2), obstacle.faces (MxK)
     %
     % Outputs:
-    % angles     - angles (in radians, 0 to 2*pi) of l1 segment from +x axis
+    % angle_degs - angles (in degrees) of l1 segment from +x axis
     % P_circle   - points (px, py) on l2 circle
     % P_centres  - centers (h,k) of l2 circle
-    
+
     x_samples = linspace(xmin, xmax, 5000);
     y_samples = m * x_samples + c;
     
@@ -53,7 +54,7 @@ function [angle_degs, P_circle, P_centres] = centre_finder(l1, l2, l3, m, c, xmi
     
     if isempty(candidates)
         disp('No valid centers found that satisfy all constraints.');
-        angles = [];
+        angle_degs = [];
         P_centres = [];
         P_circle = [];
         return;
@@ -74,7 +75,17 @@ function [angle_degs, P_circle, P_centres] = centre_finder(l1, l2, l3, m, c, xmi
     % Plotting
     figure; hold on; axis equal; 
     axis off; % TURN OFF axes
-    
+
+    % Plot obstacle with vibrant orange and thick black borders
+    if ~isempty(obstacle) && isfield(obstacle, 'vertices') && isfield(obstacle, 'faces')
+        patch('Vertices', obstacle.vertices, ...
+              'Faces', obstacle.faces, ...
+              'FaceColor', [1, 0.4, 0], ... % vibrant orange
+              'EdgeColor', 'k', ...
+              'LineWidth', 2, ...
+              'FaceAlpha', 0.9);
+    end
+
     theta = linspace(0, 2*pi, 500);
     plot(l1*cos(theta), l1*sin(theta), 'b', 'LineWidth', 1.5);
     scatter(0,0,100,'r','filled');
@@ -134,3 +145,4 @@ function centers = find_circle_center_nosymbolic(l1, r2, xp, yp)
     centers = [x3 + rx, y3 + ry;
                x3 - rx, y3 - ry];
 end
+
