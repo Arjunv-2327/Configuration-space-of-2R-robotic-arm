@@ -1,18 +1,23 @@
-% --- Set 15 ---
-l = 1.17; w = 0.843; alpha = 2.191; beta = 0.914; phi = 2.347202;
-L_1 = 2.56; L_2 = 3.03;
+% Rectangle parameters
+l = 1.2;               % Length
+w = 0.6;               % Width
+alpha = -0.9;          % Center X
+beta = 0.9;            % Center Y
+phi = 0.820305;        % Inclination
+dw = 5;                % Deviation in degrees
 
 
+% Robot Link lengths
+L_1 = 3;
+L_2 = 3;
 
-
-dw = 55;
 
 % Obstacle creation
 obstacle = create_obstacle(l, w, alpha, beta, phi);
 
 
 % Collision limits for link 1
-%[theta1, theta2] = detectAngularCollision(L_1, obstacle);
+[theta1, theta2] = detectAngularCollision(L_1, obstacle);
 
 
 % Safe region, both links do not collide - entire robot is safe
