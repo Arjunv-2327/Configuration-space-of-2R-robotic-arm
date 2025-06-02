@@ -61,9 +61,8 @@ function [P_circle, P_centres] = centre_finder(l1, l2, l3, m, c, xmin, xmax)
     P_circle = best(:, 4:5);  % points (px, py)
     
     % Plotting
-    figure; hold on; axis equal; grid on;
-    %title('Valid Circle Centers and Circles');
-    xlabel('x'); ylabel('y');
+    figure; hold on; axis equal; 
+    axis off; % TURN OFF axes
     
     theta = linspace(0, 2*pi, 500);
     plot(l1*cos(theta), l1*sin(theta), 'b', 'LineWidth', 1.5);
@@ -90,16 +89,10 @@ function [P_circle, P_centres] = centre_finder(l1, l2, l3, m, c, xmin, xmax)
         plot(x_circ, y_circ, '--', 'Color', color_l2, 'LineWidth', 1.5);
         
         scatter(h,k,100,'r','filled');
-        %text(h, k, sprintf(' (h=%.2f,k=%.2f)', h, k), 'Color', 'g', 'FontWeight','bold');
         
         plot([0, h], [0, k], '-', 'LineWidth', 2.5, 'Color', color_l1);
-        %text(h/2, k/2, 'l1', 'FontSize', 12, 'Color', color_l1, 'FontWeight', 'bold');
-        
         plot([h, px], [k, py], '-', 'LineWidth', 2.5, 'Color', color_l2);
-        %text((h+px)/2, (k+py)/2, 'l2', 'FontSize', 12, 'Color', color_l2, 'FontWeight', 'bold');
-        
         plot([px, xp], [py, yp], '-', 'LineWidth', 2.5, 'Color', color_l3);
-        %text((px+xp)/2, (py+yp)/2, 'l3', 'FontSize', 12, 'Color', color_l3, 'FontWeight', 'bold');
         
         scatter(px, py, 100, 'r', 'filled');
         scatter(xp, yp, 60, 'ko', 'filled');
