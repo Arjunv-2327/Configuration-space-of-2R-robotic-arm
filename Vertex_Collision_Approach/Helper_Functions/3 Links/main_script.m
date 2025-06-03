@@ -1,0 +1,36 @@
+% Rectangular Obstacle Parameters
+l = 5;               % Length
+w = 1.5;               % Width
+alpha = 4.5;           % Center X
+beta = -1.9;          % Center Y
+phi = pi/2;          % Inclination
+dw = 5;              % Deviation in degrees
+
+% Robot Link lengths
+L_1 = 6;  % length of link 1
+L_2 = 4;  % length of link 2
+L_3 = 2;  % length of link 3
+
+% Obstacle creation
+obstacle = create_obstacle(l, w, alpha, beta, phi);
+
+% Safe region, none of the 3 links collides - entire robot is safe
+[angle_degs, P_circle, P_centres] = three_links(L_1, L_2, L_3, obstacle);
+% Display min and max θ₁
+if ~isempty(angle_degs)
+    fprintf('Minimum θ₁: %.2f°\n', min(angle_degs));
+    fprintf('Maximum θ₁: %.2f°\n', max(angle_degs));
+else
+    fprintf('No feasible configurations found.\n');
+end
+
+% Collision limits for link 1
+%[theta1, theta2] = detectAngularCollision(L_1, obstacle);
+
+% Safe region, both links do not collide - entire robot is safe
+%[blue_angle, magenta_angle] = safespace(L_1, L_2, obstacle);
+
+% Get the range of unsafe range of theta_2 after deviating link 1
+%theta2collisionrange(magenta_angle, dw, obstacle, L_1, L_2); 
+
+
