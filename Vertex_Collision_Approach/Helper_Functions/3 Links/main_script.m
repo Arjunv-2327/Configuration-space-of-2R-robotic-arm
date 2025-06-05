@@ -1,14 +1,14 @@
 % Rectangle parameters
-l = 6.2*2;               % Length
-w = 1.6*2;               % Width
-alpha = 0.9*3;          % Center X
-beta = 3.9*3;            % Center Y
-phi = 0.820305;        % Inclination
+l = 3.2;               % Length
+w = 8.6;               % Width
+alpha = 1;          % Center X
+beta = -4.9;            % Center Y
+phi = pi/2.77;        % Inclination
 dw = 5;              % Deviation in degrees
 
 % Robot Link lengths
-L_1 = 15;  % length of link 1
-L_2 = 10;  % length of link 2
+L_1 = 8;  % length of link 1
+L_2 = 6;  % length of link 2
 L_3 = 3;  % length of link 3
 
 % Obstacle creation
