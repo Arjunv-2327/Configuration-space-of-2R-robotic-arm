@@ -1,8 +1,10 @@
-function [blue_angle, magenta_angle] = safespace(r, d, obstacle)
+function [angle1_deg, angle2_deg] = safespace(r, d, obstacle)
     figure;
     hold on;
     axis equal off;
     axis([-r-1 r+1 -r-1 r+1]);
+    angle1_deg = NaN;
+    angle2_deg = NaN;
 
     % Draw circle
     theta = linspace(0, 2*pi, 300);
@@ -11,6 +13,7 @@ function [blue_angle, magenta_angle] = safespace(r, d, obstacle)
     % Draw obstacle as solid orange rectangle
     fill(obstacle.vertices([1 2 4 3 1],1), obstacle.vertices([1 2 4 3 1],2), ...
          [1 0.6 0], 'EdgeColor', 'k', 'LineWidth', 1.5);
+
     % ---------- ANGLE UTIL ----------
     angle_wrap = @(a) mod(a, 2*pi);
 
@@ -98,54 +101,129 @@ function [blue_angle, magenta_angle] = safespace(r, d, obstacle)
     p2 = points(idx2, :);
     theta1 = angle_wrap(atan2(p1(2), p1(1)));
     theta2 = angle_wrap(atan2(p2(2), p2(1)));
+    theta_min = min(theta1, theta2);
+    theta_max = max(theta1, theta2);
 
     % Plot red dashed radii
     plot([0 r*cos(theta1)], [0 r*sin(theta1)], 'r--', 'LineWidth', 1.5);
     plot([0 r*cos(theta2)], [0 r*sin(theta2)], 'r--', 'LineWidth', 1.5);
 
-    % ---------- EXTEND TO CIRCLE ----------
-    colors = ['b', 'm'];
-    endpoints = zeros(2,2);
-    from_pts = [p1; p2];
-    theta_min = min(theta1, theta2);
-    theta_max = max(theta1, theta2);
-
     is_in_sector = @(x, y, th1, th2) ...
         (sqrt(x^2 + y^2) <= r) && ...
         (mod(atan2(y,x) - th1, 2*pi) <= mod(th2 - th1, 2*pi));
 
-    for k = 1:2
-        vx = from_pts(k,1); vy = from_pts(k,2);
-        A = vx; B = vy;
-        C = (vx^2 + vy^2 + r^2 - d^2)/(2*r);
-        R = sqrt(A^2 + B^2);
-        delta = atan2(B,A);
-        if abs(C/R) <= 1
-            sol = mod([delta + acos(C/R), delta - acos(C/R)], 2*pi);
-            for a = sol
-                px = r*cos(a); py = r*sin(a);
-                t_vals = linspace(0.01, 0.99, 100);
-                pts = (1 - t_vals') * [vx vy] + t_vals' * [px py];
-                safe = true;
-                for i = 1:length(t_vals)
-                    if is_in_sector(pts(i,1), pts(i,2), theta_min, theta_max)
-                        safe = false; break;
+    V = obstacle.vertices;
+    count_endpoints = 0;
+    endpoints = zeros(2,2);
+
+    % ----------- LOOP OVER 4 EDGES -----------
+    for j = 1:4
+        Va = V(j,:);
+        Vb = V(mod(j, size(V,1)) + 1, :);
+
+        % Skip if vertical line to avoid division by zero in slope
+        if abs(Vb(1) - Va(1)) < 1e-6
+            continue;
+        end
+
+        m = (Vb(2) - Va(2)) / (Vb(1) - Va(1));
+        c = Va(2) - m * Va(1);
+
+        eqs = @(vars) [
+            vars(2) - m*vars(1) - c;
+            vars(1) - (r*cos(vars(3)) - m*c + m*r*sin(vars(3))) / (1 + m^2);
+            (vars(1) - r*cos(vars(3)))^2 + (vars(2) - r*sin(vars(3)))^2 - d^2
+        ];
+        guesses = [0 1; 0 1; 0 pi/2];
+        opts = optimoptions('fsolve','Display','off');
+
+        for g = 1:2
+            guess = guesses(:,g);
+            [sol, ~, exitflag] = fsolve(eqs, guess, opts);
+            if exitflag <= 0
+                continue;
+            end
+            x = sol(1); y = sol(2); theta_val = sol(3);
+
+            % YOUR CHECK: if x outside segment bounds then run vertex-based method
+            if x < min(Va(1), Vb(1)) || x > max(Va(1), Vb(1))
+                % Run vertex based method for all vertices (A,B)
+                for k = 1:4
+                    vx = V(k,1);
+                    vy = V(k,2);
+
+                    A = vx; B = vy;
+                    C = (vx^2 + vy^2 + r^2 - d^2)/(2*r);
+                    R = sqrt(A^2 + B^2);
+                    delta = atan2(B,A);
+
+                    if abs(C/R) <= 1
+                        sol_angles = mod([delta + acos(C/R), delta - acos(C/R)], 2*pi);
+                        for a = sol_angles
+                            px = r*cos(a);
+                            py = r*sin(a);
+                            t_vals = linspace(0.01, 0.99, 100);
+                            pts = (1 - t_vals') * [vx vy] + t_vals' * [px py];
+                            safe = true;
+                            for i_t = 1:length(t_vals)
+                                if is_in_sector(pts(i_t,1), pts(i_t,2), theta_min, theta_max)
+                                    safe = false; 
+                                    break;
+                                end
+                            end
+                            if safe
+                                theta_full = linspace(0, 2*pi, 10000);
+                                cx = px + d*cos(theta_full);
+                                cy = py + d*sin(theta_full);
+                                in = inpolygon(cx, cy, V(:, 1), V(:, 2));
+                                if sum(in) <= 10
+                                    plot(cx, cy, 'b:', 'LineWidth', 2)
+                                    plot([vx px], [vy py], 'g-', 'LineWidth', 4);
+                                    plot([0 px], [0 py], 'k-', 'LineWidth', 4);
+                                    pt = [px py];
+                                    count_endpoints = count_endpoints + 1;
+                                    endpoints(count_endpoints,:) = pt;
+                                    if count_endpoints == 2
+                                        return;
+                                    end
+                                end
+                            end
+                        end
                     end
                 end
-                if safe
-                    plot([vx px], [vy py], [colors(k) '-'], 'LineWidth', 1.5);
-                    plot([0 px], [0 py], [colors(k) '-'], 'LineWidth', 1.5);
-                    endpoints(k,:) = [px py];
-                    break;
+
+            else
+                % Else run perpendicular method exactly as you wrote
+                pt = [r * cos(theta_val), r * sin(theta_val)];
+                t = linspace(0, 1, 10000);
+                seg_x = pt(1) + t * (x - pt(1));
+                seg_y = pt(2) + t * (y - pt(2));
+                seg_x2 = t * pt(1);
+                seg_y2 = t * pt(2);
+                cx = pt(1) + d*cos(theta);
+                cy = pt(2) + d*sin(theta);
+                in_seg = inpolygon(seg_x, seg_y, V(:,1), V(:,2));
+                in_seg2 = inpolygon(seg_x2, seg_y2, V(:,1), V(:,2));
+                in3 = inpolygon(cx, cy, V(:, 1), V(:, 2));
+                if sum(in_seg) <= 10 && sum(in_seg2) <= 10 && sum(in3) <= 10
+                    plot([pt(1) x], [pt(2) y], 'g-', 'LineWidth', 4);
+                    plot([0 pt(1)], [0 pt(2)], 'k-', 'LineWidth', 4);
+                    count_endpoints = count_endpoints + 1;
+                    endpoints(count_endpoints,:) = pt;
+                    if count_endpoints == 2
+                        return;
+                    end
                 end
             end
         end
+        if count_endpoints == 2
+            return;
+        end
     end
 
-    % ---------- ANGLE OUTPUT ----------
-    blue_angle = mod(rad2deg(atan2(endpoints(1,2), endpoints(1,1))), 360);
-    magenta_angle = mod(rad2deg(atan2(endpoints(2,2), endpoints(2,1))), 360);
+    angle1_deg = mod(rad2deg(atan2(endpoints(1,2), endpoints(1,1))), 360);
+    angle2_deg = mod(rad2deg(atan2(endpoints(2,2), endpoints(2,1))), 360);
 
-    fprintf('Blue    - %.2f degrees\n', blue_angle);
-    fprintf('Magenta - %.2f degrees\n', magenta_angle);
+    fprintf('Link1 angle 1: %.2f degrees\n', angle1_deg);
+    fprintf('Link1 angle 2: %.2f degrees\n', angle2_deg);
 end
